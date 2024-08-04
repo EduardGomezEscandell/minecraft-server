@@ -5,9 +5,11 @@ help: ## Show this help message
 	@echo "COMMANDS"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-download: ## Downloads the minecraft server
+dependencies: ## Downloads the dependencies
 	mkdir -p bin
 	curl https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar > bin/server.jar
+	sudo apt update
+	sudo apt install -y default-jre
 
 WHO := $(shell whoami)
 .PHONY: install
