@@ -27,4 +27,7 @@ Host minecraft
     User USER
     Port 22
     IdentityFile ~/.ssh/YOUR_SSH_KEY
+EOF
 ```
+
+The you only need to run `./deploy.sh`.
