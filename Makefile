@@ -50,7 +50,7 @@ purge: uninstall ## Uninstalls the server and removes saved data
 start: ## Starts the installed service
 	sudo systemctl restart minecraft.service
 
-stop:
+stop: ## Stops the installed service
 	sudo systemctl stop minecraft.service
 
 CMD ?= "/help"
