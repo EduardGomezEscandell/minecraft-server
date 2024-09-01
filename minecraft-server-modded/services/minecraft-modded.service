@@ -1,0 +1,37 @@
+[Unit]
+Description=Modded Minecraft Server
+After=getty.service
+
+[Service]
+ExecStart=java -Xmx12G -Xms12G -jar forge-server.jar --nogui
+WorkingDirectory=/opt/minecraft-modded
+User=minecraft
+
+Sockets=minecraft-modded.socket
+StandardInput=socket
+StandardOutput=journal
+StandardError=journal
+
+Type=simple
+RemainAfterExit=false
+
+Restart=always
+RestartSec=10s
+
+# Some daemon restrictions
+LockPersonality=yes
+NoNewPrivileges=true
+PrivateMounts=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service @sandbox
+
+[Install]
+WantedBy=multi-user.target

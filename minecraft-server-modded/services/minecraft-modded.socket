@@ -1,0 +1,5 @@
+[Unit]
+PartOf=minecraft-modded.service
+
+[Socket]
+ListenFIFO=%t/minecraft-modded.stdin
