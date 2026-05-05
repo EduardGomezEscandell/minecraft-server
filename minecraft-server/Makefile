@@ -1,15 +1,15 @@
 .PHONY: help
 help: ## Show this help message
-	@echo "Grocery Price Fetcher Development Makefile"
+	@echo "Minecraft Development Makefile"
 	@echo ""
 	@echo "COMMANDS"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 dependencies: ## Downloads the dependencies
 	mkdir -p bin
-	curl https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar > bin/server.jar
+	curl https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar > bin/server.jar
 	sudo apt update
-	sudo apt install -y default-jre
+	sudo apt install -y openjdk-25-jre
 
 WHO := $(shell whoami)
 .PHONY: install
@@ -21,6 +21,7 @@ install: ## Installs the server
 # Create working directory owned by Minecraft
 	sudo mkdir -p /opt/minecraft
 	sudo cp bin/server.jar /opt/minecraft/server.jar
+	sudo cp server.properties /opt/minecraft/server.properties
 	sudo bash -c "echo eula=TRUE > /opt/minecraft/eula.txt"
 	sudo chown -R minecraft /opt/minecraft
 	sudo chgrp -R minecraft /opt/minecraft

@@ -6,14 +6,14 @@ SERVICE ?= minecraft-modded
 
 .PHONY: help
 help: ## Show this help message
-	@echo "Grocery Price Fetcher Development Makefile"
+	@echo "Minecraft Development Makefile"
 	@echo ""
 	@echo "COMMANDS"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 dependencies: ## Downloads the dependencies
 	sudo apt update
-	sudo apt install -y default-jre unzip wget
+	sudo apt install -y openjdk-25-jre unzip wget
 	mkdir -p bin
 	wget -q -O bin/server.jar 'https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar'
 	wget -q -O bin/forge-$(FORGE_VERSION)-installer.jar 'https://maven.minecraftforge.net/net/minecraftforge/forge/$(FORGE_VERSION)/forge-$(FORGE_VERSION)-installer.jar'
@@ -36,7 +36,7 @@ install: ## Installs the server
 	sudo cp bin/ferium '$(INSTALL_LOC)/ferium'
 	sudo bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
 	sudo chown -R minecraft:minecraft '$(INSTALL_LOC)'
-	
+
 # Install forge
 	cd '$(INSTALL_LOC)' && sudo -u minecraft -- java -jar '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar' --installServer
 	sudo -u minecraft -- mv '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-shim.jar' '$(INSTALL_LOC)/forge-server.jar'

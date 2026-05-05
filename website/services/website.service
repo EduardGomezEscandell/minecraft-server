@@ -1,15 +1,12 @@
 [Unit]
-Description=Minecraft Server
+Description=WebServer
 After=getty.service
 
 [Service]
-ExecStart=java -Xmx12G -Xms12G -jar server.jar --nogui
-ExecStop=bash -c 'echo stop > /run/minecraft.stdin'
-WorkingDirectory=/opt/minecraft
-User=minecraft
+ExecStart=python3 -m http.server 3000 --directory /www/website --bind 0.0.0.0
+WorkingDirectory=/www/website
+User=webserver
 
-Sockets=minecraft.socket
-StandardInput=socket
 StandardOutput=journal
 StandardError=journal
 
