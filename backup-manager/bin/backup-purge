@@ -1,0 +1,35 @@
+#!/bin/bash
+
+STORAGE_ACCOUNT_NAME="$1"
+STORAGE_CONTAINER_NAME="$2"
+SERVICE_ACCOUNT_NAME="${3:-}"
+
+echo "STORAGE_ACCOUNT_NAME   = ${STORAGE_ACCOUNT_NAME}"
+echo "STORAGE_CONTAINER_NAME = ${STORAGE_CONTAINER_NAME}"
+echo "SERVICE_ACCOUNT_NAME   = ${SERVICE_ACCOUNT_NAME}"
+
+if ! az account show &> /dev/null; then
+    az login --identity --allow-no-subscriptions
+    echo "Logged in to Azure CLI with identity: ${SERVICE_ACCOUNT_NAME}"
+fi
+
+az storage blob list \
+    --account-name "${STORAGE_ACCOUNT_NAME}" \
+    --container-name "${STORAGE_CONTAINER_NAME}" \
+    --auth-mode login \
+    -o json | jq -r '.[] | select(.properties.creationTime <= (now - 7*24*3600 | todate)) | .name' \
+    | while read -r blob_name; do
+        hour=$(echo "${blob_name}" | cut -d'_' -f2)
+        if [ "$hour" = "0" ]; then
+            # Keep the backup from midnight (hour 0) as a daily backup
+            continue
+        fi
+
+        echo "Deleting old backup: ${blob_name}"
+        az storage blob delete \
+            --account-name "${STORAGE_ACCOUNT_NAME}" \
+            --container-name "${STORAGE_CONTAINER_NAME}" \
+            --name "${blob_name}" \
+            --auth-mode login \
+            --output none
+    done

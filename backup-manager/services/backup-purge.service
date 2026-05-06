@@ -1,20 +1,14 @@
 [Unit]
-Description=WebServer
-After=getty.service
+Description=Minecraft server backup purge service
+Wants=backup-purge.timer
 
 [Service]
-ExecStart=python3 -m http.server 3000 --directory /www/website --bind 0.0.0.0
-WorkingDirectory=/www/website
-User=webserver
+Type=oneshot
+ExecStart=/opt/backup-manager/backup-purge {{storage_account_name}} {{storage_container_name}} {{identity_client_id}}
+User=backup-manager
 
 StandardOutput=journal
 StandardError=journal
-
-Type=simple
-RemainAfterExit=false
-
-Restart=always
-RestartSec=10s
 
 # Some daemon restrictions
 LockPersonality=yes

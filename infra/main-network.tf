@@ -17,6 +17,7 @@ resource "azurerm_subnet" "compute" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
+  service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
 }
 
 // Bastion
@@ -190,7 +191,7 @@ resource "azurerm_network_security_group" "compute" {
     source_address_prefix      = "Internet"
     source_port_range          = "*"
     destination_address_prefix = "VirtualNetwork"
-    destination_port_range     = "25565"
+    destination_port_range     = "16002"
   }
 
   security_rule {
