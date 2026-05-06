@@ -1,34 +1,44 @@
-<title>Feliz cumplea&ntilde;os</title>
-<link rel="stylesheet" type="text/css" href="style.css">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <title>Tu regalo de Minecraft</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css?v=4">
+</head>
 
 <body>
-    <span style="display: block; margin-top: 20px;">
-        <center>
-        <h1>
-            Tu regalo es un retorno al fant&aacute;stico mundo de Minecraft!
-        </h1>
+    <div class="page">
+        <marquee class="marquee" behavior="scroll" direction="left">
+            ¡Tu regalo es un regreso al fantástico mundo de Minecraft!
+            <img src="assets/nodrugs.gif" alt="¡No te drogues!" class="feature-image" height="10px">
+        </marquee>
 
-        <p>
-            Conectate a tu servidor de Minecraft usando la siguiente direcci&oacute;n IP:
-        </p>
-        <p>
-            <code><span style="color: #cc33da; font-weight: bold; font-size: 20px;">
-            {{ip_address}}
-            </code></span>
-        </p>
+        <div class="card">
+            <div class="birthday-header">
+                <h1>¡Tu regalo es Minecraft!</h1>
+            </div>
 
-        <span style="display: block; margin-top: 20px;">
-            <img src="assets/minecraft.png" alt="Minecraft" class="minecraft-gif">
-        </span>
+            <p class="message">Conéctate a tu servidor de Minecraft usando esta dirección IP:</p>
 
-        <span style="display: block; margin-top: 20px;">
-            <a href="/index.html">
-                Volver a la p&aacute;gina principal
-            </a>
-        </span>
-        </center>
-    </span>
+            <p class="message"><code class="server-ip">{{ip_address}}</code></p>
+
+            <div class="computer-gif">
+                <img src="assets/computer.gif" alt="Minecraft" class="computer-image">
+            </div>
+
+            <div class="image-container">
+                <img src="assets/minecraft.png" alt="Minecraft" class="feature-image">
+            </div>
+
+            <div class="gift">
+                <a href="/index.html" class="gift-link">
+                    <span class="gift-text">Volver a la página principal</span>
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 
-
-</title>
+</html>

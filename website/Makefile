@@ -23,6 +23,9 @@ install:
 # Allow webserver to bind to port 80
 	sudo iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 3000
 
+localhost:
+	sudo python3 -m http.server 80 --directory .
+
 start: ## Starts the installed service
 	sudo systemctl restart website.service
 
