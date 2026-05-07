@@ -37,7 +37,3 @@ output "storage_container_name" {
 output "vm_identity_principal_id" {
   value = azurerm_virtual_machine.minecraft-vm.identity[0].principal_id
 }
-
-output "domain_name" {
-  value = azurerm_public_ip.compute.fqdn
-}
