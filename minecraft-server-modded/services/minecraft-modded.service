@@ -5,7 +5,7 @@ After=getty.service
 [Service]
 ExecStart=java -Xmx12G -Xms12G -jar forge-server.jar --nogui
 WorkingDirectory=/opt/minecraft-modded
-User=minecraft
+User=minecraftmod
 
 Sockets=minecraft-modded.socket
 StandardInput=socket

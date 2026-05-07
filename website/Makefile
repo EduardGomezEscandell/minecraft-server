@@ -13,7 +13,7 @@ install:
 
 	sudo chown -R webserver /www/website
 	sudo chgrp -R webserver /www/website
-	sudo chmod -R 755 /www/website
+	sudo chmod -R 'g=u,o-rwx' /www/website
 
 # Install service files
 	sudo cp services/website.service /etc/systemd/system/website.service

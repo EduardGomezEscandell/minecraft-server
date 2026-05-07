@@ -14,11 +14,11 @@ output "vm_public_ip" {
   value = azurerm_public_ip.compute.ip_address
 }
 
-output "vm_open_minecraft_port" {
+output "vm_open_minecraft_ports" {
   value = [
-    for rule in azurerm_network_security_group.compute.security_rule: rule.destination_port_range
+    for rule in azurerm_network_security_group.compute.security_rule: rule.destination_port_ranges
     if rule.name == "Allow-Inbound-Minecraft"
-  ][0]
+  ]
 }
 
 output "vm_username" {

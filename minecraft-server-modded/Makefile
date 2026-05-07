@@ -1,8 +1,9 @@
+INSTALL_LOC ?= /opt/minecraft-modded
+SERVICE ?= minecraft-modded
+USER=minecraftmod
 FORGE_VERSION ?= 1.21.1-52.0.4
 FERIUM_VERSION ?= v4.7.0
 MINECRAFT_VERSION ?= 1.21.1
-INSTALL_LOC ?= /opt/minecraft-modded
-SERVICE ?= minecraft-modded
 
 .PHONY: help
 help: ## Show this help message
@@ -26,38 +27,43 @@ FERIUM := '$(INSTALL_LOC)/ferium' --config-file '$(INSTALL_LOC)/ferium-config.js
 .PHONY: install
 install: ## Installs the server
 # Create Minecraft group and user
-	id minecraft || sudo adduser minecraft --no-create-home --disabled-password --gecos ""
-	sudo usermod -a -G minecraft '$(WHO)'
+	id '$(USER)' || sudo adduser '$(USER)' --no-create-home --disabled-password --gecos ""
+	sudo usermod -a -G '$(USER)' '$(WHO)'
 
 # Create working directory owned by Minecraft
 	sudo mkdir -p '$(INSTALL_LOC)'
-	sudo cp bin/server.jar '$(INSTALL_LOC)/server.jar'
-	sudo cp 'bin/forge-$(FORGE_VERSION)-installer.jar' '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar'
-	sudo cp bin/ferium '$(INSTALL_LOC)/ferium'
-	sudo bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
-	sudo chown -R minecraft:minecraft '$(INSTALL_LOC)'
+	sudo chown '$(WHO):$(WHO)' '$(INSTALL_LOC)'
+	cp bin/server.jar '$(INSTALL_LOC)/server.jar'
+	cp 'server.properties' '$(INSTALL_LOC)/server.properties'
+	cp 'bin/forge-$(FORGE_VERSION)-installer.jar' '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar'
+	cp bin/ferium '$(INSTALL_LOC)/ferium'
+	bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
 
 # Install forge
-	cd '$(INSTALL_LOC)' && sudo -u minecraft -- java -jar '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar' --installServer
-	sudo -u minecraft -- mv '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-shim.jar' '$(INSTALL_LOC)/forge-server.jar'
-	cd '$(INSTALL_LOC)' && sudo rm run.sh 'forge-$(FORGE_VERSION)-installer.jar' user_jvm_args.txt
+	cd '$(INSTALL_LOC)' && java -jar '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar' --installServer
+	mv '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-shim.jar' '$(INSTALL_LOC)/forge-server.jar'
+	cd '$(INSTALL_LOC)' && rm run.sh 'forge-$(FORGE_VERSION)-installer.jar' user_jvm_args.txt
 
 # Set up Ferium
-	sudo chmod 0774 $(INSTALL_LOC)/ferium
+	sudo chmod u+x $(INSTALL_LOC)/ferium
 
-	sudo -- $(FERIUM) profile create                    \
-	            --mod-loader forge                      \
-	            --game-version '$(MINECRAFT_VERSION)'   \
-				--name forge                            \
-				--output-dir '$(INSTALL_LOC)/mods' || true
+	$(FERIUM) profile create                    \
+		--mod-loader forge                      \
+		--game-version '$(MINECRAFT_VERSION)'   \
+		--name forge                            \
+		--output-dir '$(INSTALL_LOC)/mods' || true
 
-	sudo -- $(FERIUM) add -f $(shell cat mods.json | jq -r ".[]")
-	sudo -- $(FERIUM) upgrade || true
+	$(FERIUM) add -f $(shell cat mods.json | jq -r ".[]")
+	$(FERIUM) upgrade || true
+
+# Update ownership
+	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
+	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
+	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'
 	sudo cp 'services/$(SERVICE).service' '/etc/systemd/system/$(SERVICE).service'
-	sudo sed -i 's/server.jar/forge-server.jar/' '/etc/systemd/system/$(SERVICE).service'
 
 # Update systemd
 	sudo systemctl daemon-reload
@@ -71,8 +77,8 @@ uninstall: ## Uninstalls the server
 	sudo rm '/etc/systemd/system/$(SERVICE).socket'  || true
 	sudo chgrp -R '$(WHO)' '$(INSTALL_LOC)'          || true
 	sudo chown -R '$(WHO)' '$(INSTALL_LOC)'          || true
-	sudo deluser minecraft                           || true
-	sudo delgroup minecraft                          || true
+	sudo delgroup '$(USER)'                          || true
+	sudo deluser '$(USER)'                           || true
 
 .PHONY: purge
 purge: uninstall ## Uninstalls the server and removes saved data

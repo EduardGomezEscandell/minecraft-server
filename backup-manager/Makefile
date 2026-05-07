@@ -14,9 +14,10 @@ install:
 	sudo mkdir -p /opt/backup-manager/
 	sudo cp bin/* /opt/backup-manager/
 
+
 	sudo chown -R backup-manager /opt/backup-manager
 	sudo chgrp -R backup-manager /opt/backup-manager
-	sudo chmod -R 755 /opt/backup-manager
+	sudo chmod -R 'g=u,o-rwx' /opt/backup-manager
 
 # Install service files
 	sudo cp services/* /etc/systemd/system/
@@ -32,7 +33,7 @@ stop: ## Stops the installed service
 uninstall:
 	sudo systemctl stop backup-create.service backup-purge.service
 	sudo systemctl disable backup-create.service backup-purge.service
-	cd /etc/systemd/system/ && sudo rm -f backup-create.service backup-create.timer backup-purge.service backup-purge.timer || true 
+	cd /etc/systemd/system/ && sudo rm -f backup-create.service backup-create.timer backup-purge.service backup-purge.timer || true
 	sudo rm -rf /opt/backup-manager || true
 	sudo deluser backup-manager || true
 	sudo delgroup backup-manager || true

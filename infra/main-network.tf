@@ -191,7 +191,7 @@ resource "azurerm_network_security_group" "compute" {
     source_address_prefix      = "Internet"
     source_port_range          = "*"
     destination_address_prefix = "VirtualNetwork"
-    destination_port_range     = "16002"
+    destination_port_ranges    = ["16002", "16003"]
   }
 
   security_rule {

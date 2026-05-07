@@ -1,3 +1,7 @@
+INSTALL_LOC ?= /opt/minecraft
+SERVICE ?= minecraft
+USER=minecraft
+
 .PHONY: help
 help: ## Show this help message
 	@echo "Minecraft Development Makefile"
@@ -15,47 +19,49 @@ WHO := $(shell whoami)
 .PHONY: install
 install: ## Installs the server
 # Create Minecraft group and user
-	id minecraft || sudo adduser minecraft --no-create-home --disabled-password --gecos ""
-	sudo usermod -a -G minecraft $(WHO)
+	id '$(USER)' || sudo adduser '$(USER)' --no-create-home --disabled-password --gecos ""
+	sudo usermod -a -G '$(USER)' '$(WHO)'
 
 # Create working directory owned by Minecraft
-	sudo mkdir -p /opt/minecraft
-	sudo cp bin/server.jar /opt/minecraft/server.jar
-	sudo cp server.properties /opt/minecraft/server.properties
-	sudo bash -c "echo eula=TRUE > /opt/minecraft/eula.txt"
-	sudo chown -R minecraft /opt/minecraft
-	sudo chgrp -R minecraft /opt/minecraft
+	sudo mkdir -p '$(INSTALL_LOC)'
+	sudo cp bin/server.jar '$(INSTALL_LOC)/server.jar'
+	sudo cp 'server.properties' '$(INSTALL_LOC)/server.properties'
+	sudo bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
+
+	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
+	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
+	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
 
 # Install service files
-	sudo cp services/minecraft.socket /etc/systemd/system/minecraft.socket
-	sudo cp services/minecraft.service /etc/systemd/system/minecraft.service
+	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'
+	sudo cp 'services/$(SERVICE).service' '/etc/systemd/system/$(SERVICE).service'
 
 # Update systemd
 	sudo systemctl daemon-reload
-	sudo systemctl enable minecraft.service
+	sudo systemctl enable '$(SERVICE).service'
 
 .PHONY: uninstall
 uninstall: ## Uninstalls the server
-	sudo systemctl stop minecraft.service
-	sudo systemctl disable minecraft.service
-	sudo rm /etc/systemd/system/minecraft.service || true
-	sudo rm /etc/systemd/system/minecraft.socket  || true
-	sudo chgrp -R $(WHO) /opt/minecraft
-	sudo chown -R $(WHO) /opt/minecraft
-	sudo deluser minecraft                        || true
-	sudo delgroup minecraft                       || true
+	sudo systemctl stop '$(SERVICE).service'         || true
+	sudo systemctl disable '$(SERVICE).service'      || true
+	sudo rm '/etc/systemd/system/$(SERVICE).service' || true
+	sudo rm '/etc/systemd/system/$(SERVICE).socket'  || true
+	sudo chgrp -R '$(WHO)' '$(INSTALL_LOC)'          || true
+	sudo chown -R '$(WHO)' '$(INSTALL_LOC)'          || true
+	sudo deluser '$(USER)'                           || true
+	sudo delgroup '$(USER)'                          || true
 
 .PHONY: purge
 purge: uninstall ## Uninstalls the server and removes saved data
-	rm -rf bin                 || true
-	sudo rm -rf /opt/minecraft || true
+	rm -rf bin                   || true
+	sudo rm -rf '$(INSTALL_LOC)' || true
 
 start: ## Starts the installed service
-	sudo systemctl restart minecraft.service
+	sudo systemctl restart '$(SERVICE).service' || true
 
 stop: ## Stops the installed service
-	sudo systemctl stop minecraft.service
+	sudo systemctl stop '$(SERVICE).service' || true
 
 CMD ?= "/help"
 command: ## Connect to the server's console
-	sudo bash -c 'echo $(CMD) > /run/minecraft.stdin'
+	sudo bash -c "echo $(CMD) > '/run/$(SERVICE).stdin'"
