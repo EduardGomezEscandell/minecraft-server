@@ -1,9 +1,9 @@
 INSTALL_LOC ?= /opt/minecraft-modded
 SERVICE ?= minecraft-modded
 USER=minecraftmod
-FORGE_VERSION ?= 1.21.1-52.0.4
-FERIUM_VERSION ?= v4.7.0
-MINECRAFT_VERSION ?= 1.21.1
+FERIUM_VERSION ?= v4.7.1
+MINECRAFT_VERSION ?= 26.1.2
+FORGE_VERSION ?= $(MINECRAFT_VERSION)-64.0.8
 
 .PHONY: help
 help: ## Show this help message
@@ -16,7 +16,7 @@ dependencies: ## Downloads the dependencies
 	sudo apt update
 	sudo apt install -y openjdk-25-jre unzip wget
 	mkdir -p bin
-	wget -q -O bin/server.jar 'https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar'
+	wget -q -O bin/server.jar 'https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar'
 	wget -q -O bin/forge-$(FORGE_VERSION)-installer.jar 'https://maven.minecraftforge.net/net/minecraftforge/forge/$(FORGE_VERSION)/forge-$(FORGE_VERSION)-installer.jar'
 	wget -q -O bin/ferium-linux-nogui.zip 'https://github.com/gorilla-devs/ferium/releases/download/$(FERIUM_VERSION)/ferium-linux-nogui.zip'
 	unzip bin/ferium-linux-nogui.zip -d bin
@@ -48,7 +48,7 @@ install: ## Installs the server
 	sudo chmod u+x $(INSTALL_LOC)/ferium
 
 	$(FERIUM) profile create                    \
-		--mod-loader forge                      \
+		--mod-loader neo-forge                      \
 		--game-version '$(MINECRAFT_VERSION)'   \
 		--name forge                            \
 		--output-dir '$(INSTALL_LOC)/mods' || true
@@ -77,13 +77,13 @@ uninstall: ## Uninstalls the server
 	sudo rm '/etc/systemd/system/$(SERVICE).socket'  || true
 	sudo chgrp -R '$(WHO)' '$(INSTALL_LOC)'          || true
 	sudo chown -R '$(WHO)' '$(INSTALL_LOC)'          || true
-	sudo delgroup '$(USER)'                          || true
 	sudo deluser '$(USER)'                           || true
+	sudo delgroup '$(USER)'                          || true
+	sudo rm -rf '$(INSTALL_LOC)' || true
 
 .PHONY: purge
 purge: uninstall ## Uninstalls the server and removes saved data
 	rm -rf bin                   || true
-	sudo rm -rf '$(INSTALL_LOC)' || true
 
 start: ## Starts the installed service
 	sudo systemctl restart '$(SERVICE).service' || true

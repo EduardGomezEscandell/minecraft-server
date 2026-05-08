@@ -11,7 +11,7 @@ help: ## Show this help message
 
 dependencies: ## Downloads the dependencies
 	mkdir -p bin
-	curl https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar > bin/server.jar
+	wget -q -O bin/server.jar https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar
 	sudo apt update
 	sudo apt install -y openjdk-25-jre
 
