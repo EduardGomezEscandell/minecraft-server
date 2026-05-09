@@ -2,10 +2,6 @@ output "resource_group_name" {
   value = azurerm_resource_group.rg.name
 }
 
-output "bastion_name" {
-  value = azurerm_bastion_host.bastion.name
-}
-
 output "vm_name" {
   value = azurerm_virtual_machine.minecraft-vm.name
 }
