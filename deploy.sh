@@ -97,7 +97,7 @@ function deploy_website() {
     sshremote "sed -i \"s/{{ip_address}}/${REMOTE_IP}:${VM_OPEN_PORT_1}/g\" 'website/minecraft.html'"
     sshremote "sed -i \"s/{{ip_address}}/${REMOTE_IP}:${VM_OPEN_PORT_2}/g\" 'website/mods.html'"
 
-    MODLIST=$(jq -r '.[] | "<p><a href=\"" + .url + "\" target=_blank>" + .name + "</a></p>"' minecraft-server-modded/mods.json | tr '\n' ' ')
+    MODLIST=$(jq -r '.[] | "<li><a href=\"" + .url + "\" target=_blank>" + .name + "</a></li>"' minecraft-server-modded/mods.json | tr '\n' ' ')
     sshremote "sed -i \"s|{{modlist}}|${MODLIST}|g\" 'website/mods.html'"
 
     # Install
