@@ -23,14 +23,14 @@ install: ## Installs the server
 	sudo usermod -a -G '$(USER)' '$(WHO)'
 
 # Create working directory owned by Minecraft
-	sudo mkdir -p '$(INSTALL_LOC)'
-	sudo cp bin/server.jar '$(INSTALL_LOC)/server.jar'
-	sudo cp 'server.properties' '$(INSTALL_LOC)/server.properties'
-	sudo bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
+# 	mkdir -p '$(INSTALL_LOC)'
+# 	cp bin/server.jar '$(INSTALL_LOC)/server.jar'
+# 	cp 'server.properties' '$(INSTALL_LOC)/server.properties'
+# 	bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
 
 	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
 	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
-	sudo chmod -R 'g=u-w,o-rwx' '$(INSTALL_LOC)'
+	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'

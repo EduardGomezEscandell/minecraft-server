@@ -169,14 +169,13 @@ resource "azurerm_network_security_group" "compute" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
- 
   security_rule {
-    name                       = "Allow-Inbound-Bastion"
+    name                       = "Allow-Inbound-SSH"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
-    source_address_prefix      = "${azurerm_subnet.bastion.address_prefixes[0]}"
+    source_address_prefix      = "${var.myIPAddress}"
     source_port_range          = "*"
     destination_port_range     = "22"
     destination_address_prefix = "VirtualNetwork"

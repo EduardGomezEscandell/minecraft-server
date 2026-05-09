@@ -33,11 +33,11 @@ install: ## Installs the server
 # Create working directory owned by Minecraft
 	sudo mkdir -p '$(INSTALL_LOC)'
 	sudo chown '$(WHO):$(WHO)' '$(INSTALL_LOC)'
-	cp bin/server.jar '$(INSTALL_LOC)/server.jar'
-	cp 'server.properties' '$(INSTALL_LOC)/server.properties'
-	cp 'bin/neoforge-$(FORGE_VERSION)-installer.jar' '$(INSTALL_LOC)/neoforge-$(FORGE_VERSION)-installer.jar'
-	cp bin/ferium '$(INSTALL_LOC)/ferium'
-	bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
+	sudo cp bin/server.jar '$(INSTALL_LOC)/server.jar'
+	sudo cp 'server.properties' '$(INSTALL_LOC)/server.properties'
+	sudo cp 'bin/neoforge-$(FORGE_VERSION)-installer.jar' '$(INSTALL_LOC)/neoforge-$(FORGE_VERSION)-installer.jar'
+	sudo cp bin/ferium '$(INSTALL_LOC)/ferium'
+	sudo bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
 
 # Install forge
 	java -jar '$(INSTALL_LOC)/neoforge-$(FORGE_VERSION)-installer.jar' --installServer '$(INSTALL_LOC)'
@@ -58,7 +58,7 @@ install: ## Installs the server
 # Update ownership
 	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
 	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
-	sudo chmod -R 'g-w,o-rwx' '$(INSTALL_LOC)'
+	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'

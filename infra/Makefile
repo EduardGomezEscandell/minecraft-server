@@ -6,8 +6,8 @@
 init: .terraform
 
 plan: init
-	bash -c "source .env && terraform plan"
+	bash -c "source env.sh && terraform plan"
 
 apply: init
-	bash -c "source .env && terraform apply"
+	bash -c "source env.sh && terraform apply"
 

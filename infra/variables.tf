@@ -15,3 +15,7 @@ variable "subscription_id" {
 variable "ssh_public_key_path" {
   type = string
 }
+
+variable myIPAddress {
+  type        = string
+}
