@@ -2,17 +2,13 @@
 RELEASE:=$(shell bash -c 'source /etc/os-release && echo "$$VERSION_ID"')
 dependencies:
 	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-	DEBIAN_FRONTEND=noninteractive sudo apt update && sudo apt-get install -y jq
+	DEBIAN_FRONTEND=noninteractive sudo apt install -y jq
 
 WHO := $(shell whoami)
 install:
 # Create user. We need a home directory otherwise az cli will fail (see https://github.com/Azure/azure-cli/issues/24397)
 	id backup-manager || sudo adduser backup-manager --disabled-password --gecos "" --home /home/backup-manager
 	sudo usermod -a -G backup-manager '$(WHO)'
-
-# Allow backup-manager to read the Minecraft server files
-	getent group minecraft        && sudo addgroup backup-manager minecraft
-	getent group minecraft-modded && sudo addgroup backup-manager minecraft-modded
 
 # Create working directory owned by backup-manager
 	sudo mkdir -p /opt/backup-manager/

@@ -148,7 +148,7 @@ upgrade_packages
 
 # Deploy backup-manager before the Minecraft server because it creates a backup right after starting,
 # hence making server deployment safer
-# deploy_backup_manager
+deploy_backup_manager
 deploy_minecraft_server
 deploy_minecraft_server_modded
 deploy_website
