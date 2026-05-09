@@ -3,7 +3,7 @@ Description=Modded Minecraft Server
 After=getty.service
 
 [Service]
-ExecStart=java -Xmx12G -Xms12G -jar forge-server.jar --nogui
+ExecStart=/opt/minecraft-modded/run.sh --nogui
 WorkingDirectory=/opt/minecraft-modded
 User=minecraftmod
 

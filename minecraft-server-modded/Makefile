@@ -1,10 +1,10 @@
 INSTALL_LOC ?= /opt/minecraft-modded
 SERVICE ?= minecraft-modded
 USER=minecraftmod
+LOCAL_INSTALL=/mnt/c/Users/edu19/AppData/Roaming/.minecraft
 FERIUM_VERSION ?= v4.7.1
 MINECRAFT_VERSION ?= 26.1.2
-FORGE_VERSION ?= $(MINECRAFT_VERSION)-64.0.8
-
+FORGE_VERSION ?= 26.1.2.43-beta
 .PHONY: help
 help: ## Show this help message
 	@echo "Minecraft Development Makefile"
@@ -17,13 +17,14 @@ dependencies: ## Downloads the dependencies
 	sudo apt install -y openjdk-25-jre unzip wget
 	mkdir -p bin
 	wget -q -O bin/server.jar 'https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar'
-	wget -q -O bin/forge-$(FORGE_VERSION)-installer.jar 'https://maven.minecraftforge.net/net/minecraftforge/forge/$(FORGE_VERSION)/forge-$(FORGE_VERSION)-installer.jar'
+	wget -q -O bin/neoforge-$(FORGE_VERSION)-installer.jar 'https://maven.neoforged.net/releases/net/neoforged/neoforge/$(FORGE_VERSION)/neoforge-$(FORGE_VERSION)-installer.jar'
 	wget -q -O bin/ferium-linux-nogui.zip 'https://github.com/gorilla-devs/ferium/releases/download/$(FERIUM_VERSION)/ferium-linux-nogui.zip'
 	unzip bin/ferium-linux-nogui.zip -d bin
 	rm bin/ferium-linux-nogui.zip
 
 WHO := $(shell whoami)
 FERIUM := '$(INSTALL_LOC)/ferium' --config-file '$(INSTALL_LOC)/ferium-config.json'
+LOCAL_FERIUM := '$(LOCAL_INSTALL)/ferium' --config-file '$(LOCAL_INSTALL)/ferium-config.json'
 .PHONY: install
 install: ## Installs the server
 # Create Minecraft group and user
@@ -35,20 +36,19 @@ install: ## Installs the server
 	sudo chown '$(WHO):$(WHO)' '$(INSTALL_LOC)'
 	cp bin/server.jar '$(INSTALL_LOC)/server.jar'
 	cp 'server.properties' '$(INSTALL_LOC)/server.properties'
-	cp 'bin/forge-$(FORGE_VERSION)-installer.jar' '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar'
+	cp 'bin/neoforge-$(FORGE_VERSION)-installer.jar' '$(INSTALL_LOC)/neoforge-$(FORGE_VERSION)-installer.jar'
 	cp bin/ferium '$(INSTALL_LOC)/ferium'
 	bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
 
 # Install forge
-	cd '$(INSTALL_LOC)' && java -jar '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-installer.jar' --installServer
-	mv '$(INSTALL_LOC)/forge-$(FORGE_VERSION)-shim.jar' '$(INSTALL_LOC)/forge-server.jar'
-	cd '$(INSTALL_LOC)' && rm run.sh 'forge-$(FORGE_VERSION)-installer.jar' user_jvm_args.txt
-
+	java -jar '$(INSTALL_LOC)/neoforge-$(FORGE_VERSION)-installer.jar' --installServer '$(INSTALL_LOC)'
+	echo "-Xmx12G -Xms12G" | tee '$(INSTALL_LOC)/user_jvm_args.txt'
+	rm -rf '$(INSTALL_LOC)/neoforge-$(FORGE_VERSION)-installer.jar'
 # Set up Ferium
 	sudo chmod u+x $(INSTALL_LOC)/ferium
 
 	$(FERIUM) profile create                    \
-		--mod-loader neo-forge                      \
+		--mod-loader neo-forge                  \
 		--game-version '$(MINECRAFT_VERSION)'   \
 		--name forge                            \
 		--output-dir '$(INSTALL_LOC)/mods' || true
@@ -69,6 +69,21 @@ install: ## Installs the server
 	sudo systemctl daemon-reload
 	sudo systemctl enable '$(SERVICE).service'
 
+local-install:
+	cp 'bin/neoforge-$(FORGE_VERSION)-installer.jar' '$(LOCAL_INSTALL)/neoforge-$(FORGE_VERSION)-installer.jar'
+	cp bin/ferium '$(LOCAL_INSTALL)/ferium'
+	java -jar '$(LOCAL_INSTALL)/neoforge-$(FORGE_VERSION)-installer.jar' --install-client $(LOCAL_INSTALL)
+	rm -rf '$(LOCAL_INSTALL)/neoforge-$(FORGE_VERSION)-installer.jar'
+
+	$(LOCAL_FERIUM) profile create                    \
+		--mod-loader neo-forge                  \
+		--game-version '$(MINECRAFT_VERSION)'   \
+		--name forge                            \
+		--output-dir '$(LOCAL_INSTALL)/mods' || true
+
+	$(LOCAL_FERIUM) add -f $(shell cat mods.json | jq -r ".[]")
+	$(LOCAL_FERIUM) upgrade || true
+
 .PHONY: uninstall
 uninstall: ## Uninstalls the server
 	sudo systemctl stop '$(SERVICE).service'         || true
@@ -79,11 +94,12 @@ uninstall: ## Uninstalls the server
 	sudo chown -R '$(WHO)' '$(INSTALL_LOC)'          || true
 	sudo deluser '$(USER)'                           || true
 	sudo delgroup '$(USER)'                          || true
-	sudo rm -rf '$(INSTALL_LOC)' || true
+	sudo rm -rf '$(INSTALL_LOC)/mods' '$(INSTALL_LOC)/ferium-config.json' || true
 
 .PHONY: purge
 purge: uninstall ## Uninstalls the server and removes saved data
 	rm -rf bin                   || true
+	sudo rm -rf '$(INSTALL_LOC)' || true
 
 start: ## Starts the installed service
 	sudo systemctl restart '$(SERVICE).service' || true
