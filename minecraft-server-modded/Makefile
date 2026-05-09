@@ -13,7 +13,6 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 dependencies: ## Downloads the dependencies
-	sudo apt update
 	sudo apt install -y openjdk-25-jre unzip wget
 	mkdir -p bin
 	wget -q -O bin/server.jar 'https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar'
@@ -53,13 +52,13 @@ install: ## Installs the server
 		--name forge                            \
 		--output-dir '$(INSTALL_LOC)/mods' || true
 
-	$(FERIUM) add -f $(shell cat mods.json | jq -r ".[]")
+	$(FERIUM) add -f $(shell jq -r ".[].project_id" "mods.json")
 	$(FERIUM) upgrade || true
 
 # Update ownership
 	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
 	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
-	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
+	sudo chmod -R 'g-w,o-rwx' '$(INSTALL_LOC)'
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'
@@ -81,7 +80,7 @@ local-install:
 		--name forge                            \
 		--output-dir '$(LOCAL_INSTALL)/mods' || true
 
-	$(LOCAL_FERIUM) add -f $(shell cat mods.json | jq -r ".[]")
+	$(LOCAL_FERIUM) add -f $(shell jq -r ".[].project_id" "mods.json")
 	$(LOCAL_FERIUM) upgrade || true
 
 .PHONY: uninstall

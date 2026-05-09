@@ -91,6 +91,10 @@ function deploy_website() {
 
     # Replace placeholders
     sshremote "sed -i \"s/{{ip_address}}/${VM_PUBLIC_IP}:${VM_OPEN_PORT_1}/g\" 'website/minecraft.html'"
+    sshremote "sed -i \"s/{{ip_address}}/${VM_PUBLIC_IP}:${VM_OPEN_PORT_2}/g\" 'website/mods.html'"
+
+    MODLIST=$(jq -r '.[] | "<p><a href=\"" + .url + "\" target=_blank>" + .name + "</a></p>"' minecraft-server-modded/mods.json | tr '\n' ' ')
+    sshremote "sed -i \"s|{{modlist}}|${MODLIST}|g\" 'website/mods.html'"
 
     # Install
     sshremote "cd website && make install && make start"
@@ -144,9 +148,9 @@ upgrade_packages
 
 # Deploy backup-manager before the Minecraft server because it creates a backup right after starting,
 # hence making server deployment safer
-deploy_backup_manager
+# deploy_backup_manager
 deploy_minecraft_server
-# deploy_minecraft_server_modded # WIP
+deploy_minecraft_server_modded
 deploy_website
 
 # Remove temp files
@@ -154,3 +158,5 @@ remove_old_files
 
 # Kill the tunnel process after we're done
 kill_bastion
+
+printf "\n\nDeployment complete! You can access the website at http://${VM_PUBLIC_IP}\n"

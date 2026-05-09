@@ -1,16 +1,67 @@
-{
-  "Balm (Forge Edition)": "531761",
-  "Biomes O' Plenty": "220318",
-  "Corpse": "316582",
-  "Dungeon Crawl": "324973",
-  "FallingTree": "349559",
-  "Framework": "549225",
-  "Glitchcore": "955399",
-  "JourneyMap": "32274",
-  "MrCrayfish's Furniture Mod: Refurbished": "897116",
-  "Server Performance - Smooth Chunk Save[Forge/Fabric]": "582327",
-  "Smoothchunk": "582327",
-  "TerraBlender (NeoForge)": "940057",
-  "TrashSlot": "235577",
-  "Cupboard": "326652"
-}
+[
+  {
+    "name": "Balm (Forge Edition)",
+    "project_id": "531761",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/balm-forge-edition"
+  },
+  {
+    "name": "Biomes O' Plenty",
+    "project_id": "220318",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty"
+  },
+  {
+    "name": "Corpse",
+    "project_id": "316582",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/corpse"
+  },
+  {
+    "name": "Dungeon Crawl",
+    "project_id": "324973",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/dungeon-crawl"
+  },
+  {
+    "name": "FallingTree",
+    "project_id": "349559",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/falling-tree"
+  },
+  {
+    "name": "Framework",
+    "project_id": "549225",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/framework"
+  },
+  {
+    "name": "Glitchcore",
+    "project_id": "955399",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/glitchcore"
+  },
+  {
+    "name": "JourneyMap",
+    "project_id": "32274",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/journeymap"
+  },
+  {
+    "name": "MrCrayfish's Furniture Mod: Refurbished",
+    "project_id": "897116",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/refurbished-furniture"
+  },
+  {
+    "name": "Server Performance - Smooth Chunk Save[Forge/Fabric]",
+    "project_id": "582327",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/smooth-chunk-save"
+  },
+  {
+    "name": "TerraBlender (NeoForge)",
+    "project_id": "940057",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/terrablender-neoforge"
+  },
+  {
+    "name": "TrashSlot",
+    "project_id": "235577",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/trashslot"
+  },
+  {
+    "name": "Cupboard",
+    "project_id": "326652",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/cupboard"
+  }
+]

@@ -7,6 +7,8 @@ ExecStart=/opt/minecraft-modded/run.sh --nogui
 WorkingDirectory=/opt/minecraft-modded
 User=minecraftmod
 
+UMask=027
+
 Sockets=minecraft-modded.socket
 StandardInput=socket
 StandardOutput=journal
@@ -31,7 +33,7 @@ ProtectKernelTunables=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes
 SystemCallArchitectures=native
-SystemCallFilter=@system-service @sandbox
+SystemCallFilter=@system-service
 
 [Install]
 WantedBy=multi-user.target

@@ -5,7 +5,7 @@ Wants=backup-create.timer
 [Service]
 Type=oneshot
 ExecStart=/opt/backup-manager/backup-create {{storage_account_name}} {{storage_container_name}} {{identity_client_id}}
-User=backup-manager
+User=root
 
 StandardOutput=journal
 StandardError=journal

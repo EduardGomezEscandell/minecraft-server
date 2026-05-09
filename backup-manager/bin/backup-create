@@ -16,13 +16,14 @@ fi
 
 tmpdir=$(mktemp -d)
 timestamp=$(date +'%Y%m%d_%H')
-mkdir -p "${tmpdir}/${timestamp}"
+mkdir -p "${tmpdir}/${timestamp}/server"
+mkdir -p "${tmpdir}/${timestamp}/server-modded"
 
 echo "Created temporary directory: ${tmpdir}/${timestamp}"
 
-cd /opt/minecraft/
-for file in banned-ips.json banned-players.json logs/latest-log ops.json whitelist.json world; do
-    cp -r "$file" "${tmpdir}/${timestamp}" 2>/dev/null || true
+for file in banned-ips.json banned-players.json logs/latest-log ops.json whitelist.json world/; do
+    cp -r "/opt/minecraft/$file"        "${tmpdir}/${timestamp}/server/"        && echo "Copied /opt/minecraft/${file}"        || true
+    cp -r "/opt/minecraft-modded/$file" "${tmpdir}/${timestamp}/server-modded/" && echo "Copied /opt/minecraft-modded/${file}" || true
 done
 
 cd "${tmpdir}"
@@ -42,5 +43,7 @@ az storage blob upload \
     --auth-mode login \
     --overwrite \
     --output none
+
+rm -rf "${tmpdir}"
 
 echo "Backup uploaded to Azure Blob Storage: ${STORAGE_ACCOUNT_NAME}/${STORAGE_CONTAINER_NAME}/${timestamp}"

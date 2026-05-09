@@ -30,7 +30,7 @@ install: ## Installs the server
 
 	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
 	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
-	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
+	sudo chmod -R 'g=u-w,o-rwx' '$(INSTALL_LOC)'
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'
@@ -53,7 +53,7 @@ uninstall: ## Uninstalls the server
 
 .PHONY: purge
 purge: uninstall ## Uninstalls the server and removes saved data
-	rm -rf bin                   || true
+# 	rm -rf bin                   || true
 	sudo rm -rf '$(INSTALL_LOC)' || true
 
 start: ## Starts the installed service

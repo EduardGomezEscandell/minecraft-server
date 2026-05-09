@@ -8,6 +8,8 @@ ExecStop=bash -c 'echo stop > /run/minecraft.stdin'
 WorkingDirectory=/opt/minecraft
 User=minecraft
 
+UMask=027
+
 Sockets=minecraft.socket
 StandardInput=socket
 StandardOutput=journal
