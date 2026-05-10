@@ -1,41 +1,37 @@
-.PHONY: install uninstall start stop
+.PHONY: build push pull run install uninstall
 
-WHO := $(shell whoami)
-install:
-# Create user
-	id webserver || sudo adduser webserver --no-create-home --disabled-password --gecos ""
-	sudo usermod -a -G webserver $(WHO)
+SERVER_IP?="localhost"
+SERVER_PORT1?="16001"
+SERVER_PORT2?="16002"
 
-# Create working directory owned by webserver
-	sudo mkdir -p /www/website
-	sudo cp -r * /www/website
-	sudo rm -rf /www/website/services || true
+build:
+	cp ../minecraft-server-modded/mods.json ./mods.json
+	docker build \
+		--tag website:latest \
+		--build-arg SERVER_IP=${SERVER_IP} \
+		--build-arg SERVER_PORT1=${SERVER_PORT1} \
+		--build-arg SERVER_PORT2=${SERVER_PORT2} \
+		.
 
-	sudo chown -R webserver /www/website
-	sudo chgrp -R webserver /www/website
-	sudo chmod -R 'g=u,o-rwx' /www/website
+push:
+	docker tag website:latest minecraftcoleguisacr.azurecr.io/website:latest
+	docker push minecraftcoleguisacr.azurecr.io/website:latest
 
-# Install service files
+pull:
+	docker pull minecraftcoleguisacr.azurecr.io/website:latest
+	docker tag minecraftcoleguisacr.azurecr.io/website:latest website:latest
+
+run:
+	docker run --rm -p 127.0.0.1:80:3000 --name website website:latest
+
+install: pull
 	sudo cp services/website.service /etc/systemd/system/website.service
 	sudo systemctl daemon-reload
 	sudo systemctl enable website.service
-
-# Allow webserver to bind to port 80
-	sudo iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 3000
-
-localhost:
-	sudo python3 -m http.server 80 --directory .
-
-start: ## Starts the installed service
 	sudo systemctl restart website.service
 
-stop: ## Stops the installed service
-	sudo systemctl stop website.service
-
 uninstall:
-	sudo systemctl stop website.service
-	sudo systemctl disable website.service
+	sudo systemctl stop website.service         || true
+	sudo systemctl disable website.service      || true
 	sudo rm /etc/systemd/system/website.service || true
-	sudo rm -rf /www/website || true
-	sudo deluser webserver || true
-	sudo delgroup webserver || true
+	sudo systemctl daemon-reload                || true

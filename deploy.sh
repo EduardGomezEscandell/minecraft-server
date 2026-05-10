@@ -41,6 +41,10 @@ function sshremote() {
     ssh -p "${LOCAL_PORT}" "${REMOTE_USER}@localhost" -- "$@"
 }
 
+function scpremote() {
+    scp -P "${LOCAL_PORT}" -r "$1" "${REMOTE_USER}@localhost:$2"
+}
+
 function kill_tunnel() {
     kill $(
         ps aux \
@@ -57,8 +61,17 @@ function remove_old_files() {
     sshremote "rm -rf backup-manager" || true
 }
 
-function upgrade_packages() {
-    sshremote "sudo apt update && sudo apt install -y make tmux && sudo apt upgrade -y && sudo apt autoremove -y"
+function setup_packages() {
+    sshremote sudo apt update
+    sshremote sudo apt install -y make tmux docker.io docker-buildx
+    sshremote sudo apt upgrade -y
+    sshremote sudo apt autoremove -y
+}
+
+function setup_docker() {
+    sshremote sudo usermod -aG docker "${REMOTE_USER}"
+    sshremote az login --identity --allow-no-subscriptions
+	sshremote az acr login --name minecraftcoleguisacr
 }
 
 function deploy_minecraft_server() {
@@ -90,18 +103,19 @@ function deploy_minecraft_server_modded() {
 }
 
 function deploy_website() {
-    # Copy files over
-    scp -P "${LOCAL_PORT}" -r "${SCRIPT_DIR}/website/" "${REMOTE_USER}@localhost:/home/${REMOTE_USER}/website"
+    # Build and push the Docker image to the registry
+    pushd "${SCRIPT_DIR}/website"
+    make build SERVER_IP="${REMOTE_IP}" SERVER_PORT1="${VM_OPEN_PORT_1}" SERVER_PORT2="${VM_OPEN_PORT_2}"
+    make push
+    popd
 
-    # Replace placeholders
-    sshremote "sed -i \"s/{{ip_address}}/${REMOTE_IP}:${VM_OPEN_PORT_1}/g\" 'website/minecraft.html'"
-    sshremote "sed -i \"s/{{ip_address}}/${REMOTE_IP}:${VM_OPEN_PORT_2}/g\" 'website/mods.html'"
-
-    MODLIST=$(jq -r '.[] | "<li><a href=\"" + .url + "\" target=_blank>" + .name + "</a></li>"' minecraft-server-modded/mods.json | tr '\n' ' ')
-    sshremote "sed -i \"s|{{modlist}}|${MODLIST}|g\" 'website/mods.html'"
+    # Move files over
+    sshremote mkdir -p "/home/${REMOTE_USER}/website/services"
+    scpremote "${SCRIPT_DIR}/website/Makefile"  "/home/${REMOTE_USER}/website/"
+    scpremote "${SCRIPT_DIR}/website/services" "/home/${REMOTE_USER}/website/"
 
     # Install
-    sshremote "cd website && make install && make start"
+    sshremote "cd website && make install"
 
     # Check status
     sshremote "systemctl status website.service"
@@ -139,7 +153,8 @@ create_ssh_tunnel
 remove_old_files
 
 # Install
-upgrade_packages
+setup_packages
+setup_docker
 deploy_tmux_script
 
 # Deploy backup-manager before the Minecraft server because it creates a backup right after starting,
@@ -148,9 +163,6 @@ deploy_backup_manager
 deploy_minecraft_server
 deploy_minecraft_server_modded
 deploy_website
-
-# Remove temp files
-remove_old_files
 
 # Kill the tunnel process after we're done
 kill_tunnel

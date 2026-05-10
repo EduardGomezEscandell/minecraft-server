@@ -1,0 +1,99 @@
+cp ../minecraft-server-modded/mods.json ./mods.json
+docker build \
+	--tag website:latest \
+	--build-arg SERVER_IP="localhost" \
+	--build-arg SERVER_PORT1="16001" \
+	--build-arg SERVER_PORT2="16002" \
+	.
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 591B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mirror.gcr.io/python:3.12
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM mirror.gcr.io/python:3.12@sha256:d824f747699b6a0f1ebbee9289018c1e484c808e0d928a27be5f3ed7c5f15e4b
+#4 resolve mirror.gcr.io/python:3.12@sha256:d824f747699b6a0f1ebbee9289018c1e484c808e0d928a27be5f3ed7c5f15e4b 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 3.31kB done
+#5 DONE 0.0s
+
+#6 [2/8] ADD src /app
+#6 CACHED
+
+#7 [3/8] WORKDIR /app
+#7 CACHED
+
+#8 [4/8] ADD mods.json mods.json
+#8 CACHED
+
+#9 [5/8] ADD replace_placeholders.sh replace_placeholders.sh
+#9 DONE 0.0s
+
+#10 [6/8] RUN ./replace_placeholders.sh "/app" "localhost" "16001" "16002"     && rm replace_placeholders.sh mods.json
+#10 0.230 + SRC_DIR=/app
+#10 0.230 + SERVER_IP=localhost
+#10 0.230 + SERVER_PORT1=16001
+#10 0.230 + SERVER_PORT2=16002
+#10 0.230 + echo 'SRC_DIR      = /app'
+#10 0.230 SRC_DIR      = /app
+#10 0.230 SERVER_IP    = localhost
+#10 0.230 + echo 'SERVER_IP    = localhost'
+#10 0.230 + echo 'SERVER_PORT1 = 16001'
+#10 0.230 SERVER_PORT1 = 16001
+#10 0.231 SERVER_PORT2 = 16002
+#10 0.231 + echo 'SERVER_PORT2 = 16002'
+#10 0.231 + sed -i 's/{{ip_address}}/localhost:16001/g' /app/minecraft.html
+#10 0.237 + sed -i 's/{{ip_address}}/localhost:16002/g' /app/mods.html
+#10 0.239 + ls -laH
+#10 0.245 total 76
+#10 0.245 drwxr-xr-x 1 root root  4096 May 10 17:30 .
+#10 0.245 drwxr-xr-x 1 root root  4096 May 10 17:30 ..
+#10 0.245 -rw-r--r-- 1 root root    26 May  7 20:28 agents.txt
+#10 0.245 drwxr-xr-x 2 root root  4096 May  9 17:44 assets
+#10 0.245 -rw-r--r-- 1 root root 29328 May  9 10:26 favicon.ico
+#10 0.245 -rw-r--r-- 1 root root  1646 May  6 22:43 index.html
+#10 0.245 -rw-r--r-- 1 root root  1813 May 10 17:30 minecraft.html
+#10 0.245 -rw-r--r-- 1 root root  2236 May 10 17:30 mods.html
+#10 0.245 -rw-r--r-- 1 root root  1852 May 10 17:25 mods.json
+#10 0.245 -rwxr-xr-x 1 root root   646 May 10 17:30 replace_placeholders.sh
+#10 0.245 -rw-r--r-- 1 root root    26 May  7 20:27 robots.txt
+#10 0.245 -rw-r--r-- 1 root root  3065 May  9 17:46 style.css
+#10 0.246 ++ jq -r '.[] | "<li><a href=\"" + .url + "\" target=_blank>" + .name + "</a></li>"' mods.json
+#10 0.246 ./replace_placeholders.sh: line 19: jq: command not found
+#10 0.246 ++ tr '\n' ' '
+#10 0.248 + MODLIST=
+#10 0.248 + '[' -z '' ']'
+#10 0.248 + MODLIST='No mods found.'
+#10 0.248 + exit 2
+#10 ERROR: process "/bin/sh -c ./replace_placeholders.sh \"/app\" \"${SERVER_IP}\" \"${SERVER_PORT1}\" \"${SERVER_PORT2}\"     && rm replace_placeholders.sh mods.json" did not complete successfully: exit code: 2
+------
+ > [6/8] RUN ./replace_placeholders.sh "/app" "localhost" "16001" "16002"     && rm replace_placeholders.sh mods.json:
+0.245 -rwxr-xr-x 1 root root   646 May 10 17:30 replace_placeholders.sh
+0.245 -rw-r--r-- 1 root root    26 May  7 20:27 robots.txt
+0.245 -rw-r--r-- 1 root root  3065 May  9 17:46 style.css
+0.246 ++ jq -r '.[] | "<li><a href=\"" + .url + "\" target=_blank>" + .name + "</a></li>"' mods.json
+0.246 ./replace_placeholders.sh: line 19: jq: command not found
+0.246 ++ tr '\n' ' '
+0.248 + MODLIST=
+0.248 + '[' -z '' ']'
+0.248 + MODLIST='No mods found.'
+0.248 + exit 2
+------
+Dockerfile:13
+--------------------
+  12 |     
+  13 | >>> RUN ./replace_placeholders.sh "/app" "${SERVER_IP}" "${SERVER_PORT1}" "${SERVER_PORT2}" \
+  14 | >>>     && rm replace_placeholders.sh mods.json
+  15 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c ./replace_placeholders.sh \"/app\" \"${SERVER_IP}\" \"${SERVER_PORT1}\" \"${SERVER_PORT2}\"     && rm replace_placeholders.sh mods.json" did not complete successfully: exit code: 2
+make: *** [Makefile:9: build] Error 1

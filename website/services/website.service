@@ -3,9 +3,9 @@ Description=WebServer
 After=getty.service
 
 [Service]
-ExecStart=python3 -m http.server 3000 --directory /www/website --bind 0.0.0.0
-WorkingDirectory=/www/website
-User=webserver
+ExecStart=docker run --rm -p "0.0.0.0:80:3000" --name website website:latest
+ExecStop=docker stop website
+ExecReload=docker restart website
 
 StandardOutput=journal
 StandardError=journal
@@ -15,21 +15,6 @@ RemainAfterExit=false
 
 Restart=always
 RestartSec=10s
-
-# Some daemon restrictions
-LockPersonality=yes
-NoNewPrivileges=true
-PrivateMounts=yes
-PrivateTmp=yes
-ProtectControlGroups=yes
-ProtectHostname=yes
-ProtectKernelLogs=yes
-ProtectKernelModules=yes
-ProtectKernelTunables=yes
-RestrictRealtime=yes
-RestrictSUIDSGID=yes
-SystemCallArchitectures=native
-SystemCallFilter=@system-service
 
 [Install]
 WantedBy=multi-user.target

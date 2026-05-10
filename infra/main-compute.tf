@@ -73,3 +73,9 @@ resource "azurerm_role_assignment" "storage_blob_data_contributor_vm" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_virtual_machine.minecraft-vm.identity[0].principal_id
 }
+
+resource "azurerm_role_assignment" "acr_pull_vm" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_virtual_machine.minecraft-vm.identity[0].principal_id
+}
