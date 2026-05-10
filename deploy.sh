@@ -75,28 +75,38 @@ function setup_docker() {
 }
 
 function deploy_minecraft_server() {
-    # Copy files over
-    scp -P "${LOCAL_PORT}" -r "${SCRIPT_DIR}/minecraft-server/" "${REMOTE_USER}@localhost:/home/${REMOTE_USER}/minecraft-server"
-
-    # Replace placeholders
-    sshremote "sed -i \"s/{{vm_open_port}}/${VM_OPEN_PORT_1}/g\" 'minecraft-server/server.properties'"
+    # Build and push the Docker image to the registry
+    pushd "${SCRIPT_DIR}/minecraft-server"
+    make build SERVER_PORT="${VM_OPEN_PORT_1}"
+    make push
+    popd
 
     # Install
-    sshremote "cd minecraft-server && make dependencies && make install && make start"
+    sshremote mkdir -p "/home/${REMOTE_USER}/minecraft-server"
+    scpremote "${SCRIPT_DIR}/minecraft-server/Makefile"  "/home/${REMOTE_USER}/minecraft-server/"
+    scpremote "${SCRIPT_DIR}/minecraft-server/services/" "/home/${REMOTE_USER}/minecraft-server/"
+
+    # Install
+    sshremote "cd minecraft-server && make install SERVER_PORT=${VM_OPEN_PORT_1}"
 
     # Check status
     sshremote "systemctl status minecraft.service"
 }
 
 function deploy_minecraft_server_modded() {
-    # Copy files over
-    scp -P "${LOCAL_PORT}" -r "${SCRIPT_DIR}/minecraft-server-modded/" "${REMOTE_USER}@localhost:/home/${REMOTE_USER}/minecraft-server-modded"
-
-    # Replace placeholders
-    sshremote "sed -i \"s/{{vm_open_port}}/${VM_OPEN_PORT_2}/g\" 'minecraft-server-modded/server.properties'"
+     # Build and push the Docker image to the registry
+    pushd "${SCRIPT_DIR}/minecraft-server-modded"
+    make build SERVER_PORT="${VM_OPEN_PORT_2}"
+    make push
+    popd
 
     # Install
-    sshremote "cd minecraft-server-modded && make dependencies && make install && make start"
+    sshremote mkdir -p "/home/${REMOTE_USER}/minecraft-server-modded"
+    scpremote "${SCRIPT_DIR}/minecraft-server-modded/Makefile"  "/home/${REMOTE_USER}/minecraft-server-modded/"
+    scpremote "${SCRIPT_DIR}/minecraft-server-modded/services/" "/home/${REMOTE_USER}/minecraft-server-modded/"
+
+    # Install
+    sshremote "cd minecraft-server-modded && make install SERVER_PORT=${VM_OPEN_PORT_2}"
 
     # Check status
     sshremote "systemctl status minecraft-modded.service"

@@ -22,8 +22,8 @@ mkdir -p "${tmpdir}/${timestamp}/server-modded"
 echo "Created temporary directory: ${tmpdir}/${timestamp}"
 
 for file in banned-ips.json banned-players.json logs/latest.log ops.json whitelist.json world/; do
-    cp -r "/opt/minecraft/$file"        "${tmpdir}/${timestamp}/server/"        && echo "Copied /opt/minecraft/${file}"        || true
-    cp -r "/opt/minecraft-modded/$file" "${tmpdir}/${timestamp}/server-modded/" && echo "Copied /opt/minecraft-modded/${file}" || true
+    cp -r "/data/minecraft/$file"        "${tmpdir}/${timestamp}/server/"        && echo "Copied /data/minecraft/${file}"         || true
+    cp -r "/data/minecraft-modded/$file" "${tmpdir}/${timestamp}/server-modded/" && echo "Copied /data/minecraft-server/${file}"  || true
 done
 
 cd "${tmpdir}"

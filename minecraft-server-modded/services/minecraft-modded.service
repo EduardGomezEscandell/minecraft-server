@@ -1,13 +1,23 @@
 [Unit]
-Description=Modded Minecraft Server
+Description=Minecraft Modded Server
 After=getty.service
 
 [Service]
-ExecStart=/opt/minecraft-modded/run.sh --nogui
-WorkingDirectory=/opt/minecraft-modded
-User=minecraftmod
+ExecStart=docker run                                                                                       \
+		--rm -p "0.0.0.0:{{server_port}}:25565"                                                            \
+		--name minecraft-modded                                                                                   \
+		--interactive                                                                                      \
+		--mount "type=bind,src=/data/minecraft-modded/world,dst=/server/world"                             \
+		--mount "type=bind,src=/data/minecraft-modded/logs,dst=/server/logs"                               \
+		--mount "type=bind,src=/data/minecraft-modded/banned-ips.json,dst=/server/banned-ips.json"         \
+		--mount "type=bind,src=/data/minecraft-modded/banned-players.json,dst=/server/banned-players.json" \
+		--mount "type=bind,src=/data/minecraft-modded/ops.json,dst=/server/ops.json"                       \
+		--mount "type=bind,src=/data/minecraft-modded/usercache.json,dst=/server/usercache.json"           \
+		--mount "type=bind,src=/data/minecraft-modded/whitelist.json,dst=/server/whitelist.json"           \
+		minecraft-modded:latest
 
-UMask=027
+ExecStop=docker stop minecraft-modded
+ExecReload=docker restart minecraft-modded
 
 Sockets=minecraft-modded.socket
 StandardInput=socket
@@ -19,21 +29,6 @@ RemainAfterExit=false
 
 Restart=always
 RestartSec=10s
-
-# Some daemon restrictions
-LockPersonality=yes
-NoNewPrivileges=true
-PrivateMounts=yes
-PrivateTmp=yes
-ProtectControlGroups=yes
-ProtectHostname=yes
-ProtectKernelLogs=yes
-ProtectKernelModules=yes
-ProtectKernelTunables=yes
-RestrictRealtime=yes
-RestrictSUIDSGID=yes
-SystemCallArchitectures=native
-SystemCallFilter=@system-service
 
 [Install]
 WantedBy=multi-user.target

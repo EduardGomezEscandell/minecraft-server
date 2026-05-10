@@ -1,66 +1,62 @@
-INSTALL_LOC ?= /opt/minecraft
 SERVICE ?= minecraft
-USER=minecraft
+CONTAINER ?= minecraft:latest
+SERVER_PORT ?= 25565
 
-.PHONY: help
-help: ## Show this help message
-	@echo "Minecraft Development Makefile"
-	@echo ""
-	@echo "COMMANDS"
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+.PHONY: build push pull run install uninstall
 
-dependencies: ## Downloads the dependencies
-	mkdir -p bin
-	wget -q -O bin/server.jar https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar
-	sudo apt update
-	sudo apt install -y openjdk-25-jre
+build:
+	docker build --tag $(CONTAINER) .
 
-WHO := $(shell whoami)
-.PHONY: install
-install: ## Installs the server
-# Create Minecraft group and user
-	id '$(USER)' || sudo adduser '$(USER)' --no-create-home --disabled-password --gecos ""
-	sudo usermod -a -G '$(USER)' '$(WHO)'
+push:
+	docker tag $(CONTAINER) minecraftcoleguisacr.azurecr.io/$(CONTAINER)
+	docker push minecraftcoleguisacr.azurecr.io/$(CONTAINER)
 
-# Create working directory owned by Minecraft
-# 	mkdir -p '$(INSTALL_LOC)'
-# 	cp bin/server.jar '$(INSTALL_LOC)/server.jar'
-# 	cp 'server.properties' '$(INSTALL_LOC)/server.properties'
-# 	bash -c "echo eula=TRUE > '$(INSTALL_LOC)/eula.txt'"
+pull:
+	docker pull minecraftcoleguisacr.azurecr.io/$(CONTAINER)
+	docker tag minecraftcoleguisacr.azurecr.io/$(CONTAINER) $(CONTAINER)
 
-	sudo chown -R '$(USER)' '$(INSTALL_LOC)'
-	sudo chgrp -R '$(USER)' '$(INSTALL_LOC)'
-	sudo chmod -R 'g=u,o-rwx' '$(INSTALL_LOC)'
+run:
+	mkdir -p data/world data/logs
+	cd data && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json
+	docker run                        \
+		--rm -p 127.0.0.1:16002:25565 \
+		--name minecraft              \
+		--interactive                 \
+		--mount "type=bind,src=$(PWD)/data/world,dst=/server/world"                             \
+		--mount "type=bind,src=$(PWD)/data/logs,dst=/server/logs"                               \
+		--mount "type=bind,src=$(PWD)/data/banned-ips.json,dst=/server/banned-ips.json"         \
+		--mount "type=bind,src=$(PWD)/data/banned-players.json,dst=/server/banned-players.json" \
+		--mount "type=bind,src=$(PWD)/data/ops.json,dst=/server/ops.json"                       \
+		--mount "type=bind,src=$(PWD)/data/usercache.json,dst=/server/usercache.json"           \
+		--mount "type=bind,src=$(PWD)/data/whitelist.json,dst=/server/whitelist.json"           \
+		$(CONTAINER)
+
+install: pull
+# Create data directory
+	sudo mkdir -p '/data/$(SERVICE)'
+	sudo chmod 1777 '/data/$(SERVICE)'
+
+	cd '/data/$(SERVICE)' && mkdir -p world logs
+	cd '/data/$(SERVICE)' && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json
+	sudo chown -R root:root '/data/$(SERVICE)'
+	find '/data/$(SERVICE)' -type d -exec sudo chmod 1777 {} \;
+	find '/data/$(SERVICE)' -type f -exec sudo chmod 0666 {} \;
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'
 	sudo cp 'services/$(SERVICE).service' '/etc/systemd/system/$(SERVICE).service'
+	sudo sed -i "s|{{server_port}}|${SERVER_PORT}|g" "/etc/systemd/system/$(SERVICE).service"
 
 # Update systemd
 	sudo systemctl daemon-reload
 	sudo systemctl enable '$(SERVICE).service'
+	sudo systemctl restart '$(SERVICE).service'
 
-.PHONY: uninstall
-uninstall: ## Uninstalls the server
+uninstall:
 	sudo systemctl stop '$(SERVICE).service'         || true
 	sudo systemctl disable '$(SERVICE).service'      || true
 	sudo rm '/etc/systemd/system/$(SERVICE).service' || true
 	sudo rm '/etc/systemd/system/$(SERVICE).socket'  || true
-	sudo chgrp -R '$(WHO)' '$(INSTALL_LOC)'          || true
-	sudo chown -R '$(WHO)' '$(INSTALL_LOC)'          || true
-	sudo deluser '$(USER)'                           || true
-	sudo delgroup '$(USER)'                          || true
-
-.PHONY: purge
-purge: uninstall ## Uninstalls the server and removes saved data
-# 	rm -rf bin                   || true
-	sudo rm -rf '$(INSTALL_LOC)' || true
-
-start: ## Starts the installed service
-	sudo systemctl restart '$(SERVICE).service' || true
-
-stop: ## Stops the installed service
-	sudo systemctl stop '$(SERVICE).service' || true
 
 CMD ?= "/help"
 command: ## Connect to the server's console
