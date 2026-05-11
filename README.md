@@ -7,24 +7,48 @@ To run the Minecraft server on the current machine, just go `cd minecraft-server
 This should do it:
 ```bash
 cd minecraft-server
-make dependencies
+make build
 make install
-make start
 ```
+You can later uninstall with `make uninstall`. This will remove the services and docker images, but not the saved data from
+you Minecraft world. That is stored in `/data/minecraft`, which you can choose to remove manually.
+
+For modded servers, the process is the same, you just need to run these steps in directory `minecraft-server-modded`, and the 
+data is saved under `data/minecraft-moded`.
 
 ## Option 2: Running on some other machine
-This is useful if you have an Azure/AWS/GCP, etc. machine. Obtain your SSH host and user and do:
+
+### Setting up the infrastructure
+This repo contains all you need to deploy to Azure.
+
+First, log in to your Azure account with `az login`. You need to visit the portal and create a subscription.
+In this subscription, create a resource group. Inside it, create a Storage account, and within it a container named "tfstate".
+
+Then, go to infra/providers.tf and update the resource_group_name and storage_account_name variables under terraform.backend.azurerm,
+
+Once you've got this, you can deploy via:
 ```bash
-SSH_TARGET="user@hostname" ./deploy.sh
+make apply
 ```
 
-Alternatively, it is worth adding the host to your `.ssh/config` file. Run the following command
-with the proper user and hostname.
+If you want to skip the remote state and get started quicker, simply comment out the entire terraform.backend. You can always migrate later.
+
+### Deploying the servers
+There is a script that deploys both modded and unmodded servers to your Azure backend.
+
+You need to log in to Azure first:
+```
+az login
+```
+Once logged in, you have a choice of what to deploy. All gets deployed by default, but you can use any of these to deploy only part of the stack:
 ```bash
-cat << EOF >> .ssh/config
-Host minecraft 
-    HostName HOSTNAME
-    User USER
-    Port 22
-    IdentityFile ~/.ssh/YOUR_SSH_KEY
+export SKIP_BACKUP_MANAGER=1
+export SKIP_MINECRAFT=1
+export SKIP_MINECRAFT_MODDED=1
+export SKIP_WEBSITE=1
+```
+
+Once you've set any (or none) of these environement variables, you can deploy with:
+```
+./deploy.sh
 ```

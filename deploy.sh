@@ -6,6 +6,11 @@ if ! az account show &> /dev/null; then
     exit 1
 fi
 
+SKIP_MINECRAFT="${SKIP_MINECRAFT:-}"
+SKIP_MINECRAFT_MODDED="${SKIP_MINECRAFT_MODDED:-}"
+SKIP_WEBSITE="${SKIP_WEBSITE:-}"
+SKIP_BACKUP_MANAGER="${SKIP_BACKUP_MANAGER:-}"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 REMOTE_IP=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw vm_public_ip)
@@ -17,6 +22,7 @@ VM_OPEN_PORT_2=$(cd "${SCRIPT_DIR}/infra" && terraform output -json vm_open_mine
 MANAGED_IDENTITY_CLIENT_ID=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw vm_identity_principal_id)
 STORAGE_ACCOUNT_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw storage_account_name)
 STORAGE_CONTAINER_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw storage_container_name)
+STORAGE_ACR_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw acr_name)
 
 echo "REMOTE_IP                  = ${REMOTE_IP}"
 echo "REMOTE_USER                = ${REMOTE_USER}"
@@ -25,7 +31,13 @@ echo "VM_OPEN_PORT_2             = ${VM_OPEN_PORT_2}"
 echo "MANAGED_IDENTITY_CLIENT_ID = ${MANAGED_IDENTITY_CLIENT_ID}"
 echo "STORAGE_ACCOUNT_NAME       = ${STORAGE_ACCOUNT_NAME}"
 echo "STORAGE_CONTAINER_NAME     = ${STORAGE_CONTAINER_NAME}"
+echo "STORAGE_ACR_NAME           = ${STORAGE_ACR_NAME}"
+echo "SKIP_MINECRAFT             = ${SKIP_MINECRAFT}"
+echo "SKIP_MINECRAFT_MODDED      = ${SKIP_MINECRAFT_MODDED}"
+echo "SKIP_WEBSITE               = ${SKIP_WEBSITE}"
+echo "SKIP_BACKUP_MANAGER        = ${SKIP_BACKUP_MANAGER}"
 
+ACR_URL="${STORAGE_ACR_NAME}.azurecr.io"
 LOCAL_PORT=16001
 
 function create_ssh_tunnel() {
@@ -37,14 +49,6 @@ function create_ssh_tunnel() {
     done
 }
 
-function sshremote() {
-    ssh -p "${LOCAL_PORT}" "${REMOTE_USER}@localhost" -- "$@"
-}
-
-function scpremote() {
-    scp -P "${LOCAL_PORT}" -r "$1" "${REMOTE_USER}@localhost:$2"
-}
-
 function kill_tunnel() {
     kill $(
         ps aux \
@@ -54,11 +58,12 @@ function kill_tunnel() {
     ) &> /dev/null || true
 }
 
-function remove_old_files() {
-    sshremote "rm -rf website" || true
-    sshremote "rm -rf minecraft-server" || true
-    sshremote "rm -rf minecraft-server-modded" || true
-    sshremote "rm -rf backup-manager" || true
+function sshremote() {
+    ssh -p "${LOCAL_PORT}" "${REMOTE_USER}@localhost" -- "$@"
+}
+
+function scpremote() {
+    scp -P "${LOCAL_PORT}" -r "$1" "${REMOTE_USER}@localhost:$2"
 }
 
 function setup_packages() {
@@ -69,70 +74,105 @@ function setup_packages() {
 }
 
 function setup_docker() {
+    # Local
+    az acr login --name "${STORAGE_ACR_NAME}"
+
+    # Remote
     sshremote sudo usermod -aG docker "${REMOTE_USER}"
     sshremote az login --identity --allow-no-subscriptions
-	sshremote az acr login --name minecraftcoleguisacr
+	sshremote az acr login --name "${STORAGE_ACR_NAME}"
 }
 
 function deploy_minecraft_server() {
+    if [ -n "${SKIP_MINECRAFT}" ]; then
+        echo "SKIP_MINECRAFT is set, skipping deployment of Minecraft server"
+        return
+    fi
+
+    MAKE_ARGS="REGISTRY=${ACR_URL} SERVER_PORT=${VM_OPEN_PORT_1}"
+
     # Build and push the Docker image to the registry
     pushd "${SCRIPT_DIR}/minecraft-server"
-    make build SERVER_PORT="${VM_OPEN_PORT_1}"
-    make push
+    make build ${MAKE_ARGS}
+    make push ${MAKE_ARGS}
     popd
 
     # Install
     sshremote mkdir -p "/home/${REMOTE_USER}/minecraft-server"
+    sshremote "rm -rf minecraft-server/*" || true
     scpremote "${SCRIPT_DIR}/minecraft-server/Makefile"  "/home/${REMOTE_USER}/minecraft-server/"
     scpremote "${SCRIPT_DIR}/minecraft-server/services/" "/home/${REMOTE_USER}/minecraft-server/"
 
     # Install
-    sshremote "cd minecraft-server && make install SERVER_PORT=${VM_OPEN_PORT_1}"
+    sshremote "cd minecraft-server && make pull ${MAKE_ARGS} && make install ${MAKE_ARGS}"
 
     # Check status
     sshremote "systemctl status minecraft.service"
 }
 
 function deploy_minecraft_server_modded() {
-     # Build and push the Docker image to the registry
+    if [ -n "${SKIP_MINECRAFT_MODDED}" ]; then
+        echo "SKIP_MINECRAFT_MODDED is set, skipping deployment of Minecraft server"
+        return
+    fi
+
+
+    MAKE_ARGS="REGISTRY=${ACR_URL} SERVER_PORT=${VM_OPEN_PORT_2}"
+
+    # Build and push the Docker image to the registry
     pushd "${SCRIPT_DIR}/minecraft-server-modded"
-    make build SERVER_PORT="${VM_OPEN_PORT_2}"
-    make push
+    make build ${MAKE_ARGS}
+    make push ${MAKE_ARGS}
     popd
 
     # Install
     sshremote mkdir -p "/home/${REMOTE_USER}/minecraft-server-modded"
+    sshremote "rm -rf minecraft-server-modded/*" || true
     scpremote "${SCRIPT_DIR}/minecraft-server-modded/Makefile"  "/home/${REMOTE_USER}/minecraft-server-modded/"
     scpremote "${SCRIPT_DIR}/minecraft-server-modded/services/" "/home/${REMOTE_USER}/minecraft-server-modded/"
 
     # Install
-    sshremote "cd minecraft-server-modded && make install SERVER_PORT=${VM_OPEN_PORT_2}"
+    sshremote "cd minecraft-server-modded && make pull ${MAKE_ARGS} && make install ${MAKE_ARGS}"
 
     # Check status
     sshremote "systemctl status minecraft-modded.service"
 }
 
 function deploy_website() {
+    if [ -n "${SKIP_WEBSITE}" ]; then
+        echo "SKIP_WEBSITE is set, skipping deployment of website"
+        return
+    fi
+
+    MAKE_ARGS="REGISTRY=${ACR_URL} SERVER_IP=${REMOTE_IP} SERVER_PORT1=${VM_OPEN_PORT_1} SERVER_PORT2=${VM_OPEN_PORT_2}"
+
     # Build and push the Docker image to the registry
     pushd "${SCRIPT_DIR}/website"
-    make build SERVER_IP="${REMOTE_IP}" SERVER_PORT1="${VM_OPEN_PORT_1}" SERVER_PORT2="${VM_OPEN_PORT_2}"
-    make push
+    make build ${MAKE_ARGS}
+    make push ${MAKE_ARGS}
     popd
 
     # Move files over
     sshremote mkdir -p "/home/${REMOTE_USER}/website/services"
+    sshremote "rm -rf website/*" || true
     scpremote "${SCRIPT_DIR}/website/Makefile"  "/home/${REMOTE_USER}/website/"
     scpremote "${SCRIPT_DIR}/website/services" "/home/${REMOTE_USER}/website/"
 
     # Install
-    sshremote "cd website && make install"
+    sshremote "cd website  && make pull ${MAKE_ARGS} && make install ${MAKE_ARGS}"
 
     # Check status
-    sshremote "systemctl status website.service"
+    sshremote systemctl status website.service
 }
 
 function deploy_backup_manager() {
+    if [ -n "${SKIP_BACKUP_MANAGER}" ]; then
+        echo "SKIP_BACKUP_MANAGER is set, skipping deployment of backup manager"
+        return
+    fi
+
     # Copy files over
+    sshremote "rm -rf backup-manager" || true
     scp -P "${LOCAL_PORT}" -r "${SCRIPT_DIR}/backup-manager/" "${REMOTE_USER}@localhost:/home/${REMOTE_USER}/backup-manager"
 
     # Replace placeholders
@@ -160,15 +200,13 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 
 create_ssh_tunnel
-remove_old_files
 
 # Install
 setup_packages
 setup_docker
 deploy_tmux_script
 
-# Deploy backup-manager before the Minecraft server because it creates a backup right after starting,
-# hence making server deployment safer
+# Deploy services
 deploy_backup_manager
 deploy_minecraft_server
 deploy_minecraft_server_modded
@@ -177,4 +215,4 @@ deploy_website
 # Kill the tunnel process after we're done
 kill_tunnel
 
-printf "\n\nDeployment complete! You can access the website at http://${REMOTE_IP}\n"
+printf "\n\nDeployment complete! Your resources are available at ${REMOTE_IP}\n"

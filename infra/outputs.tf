@@ -34,6 +34,6 @@ output "vm_identity_principal_id" {
   value = azurerm_virtual_machine.minecraft-vm.identity[0].principal_id
 }
 
-output "acr_login_server" {
-  value = azurerm_container_registry.acr.login_server
+output "acr_name" {
+  value = azurerm_container_registry.acr.name
 }

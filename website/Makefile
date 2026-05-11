@@ -1,31 +1,32 @@
 .PHONY: build push pull run install uninstall
 
-REGISTRY?="minecraftcoleguisacr.azurecr.io"
-SERVER_IP?="localhost"
-SERVER_PORT1?="16001"
-SERVER_PORT2?="16002"
+REGISTRY?=minecraftcoleguisacr.azurecr.io
+CONTAINER?=website:latest
+SERVER_IP?=localhost
+SERVER_PORT1?=16001
+SERVER_PORT2?=16002
 
 build:
 	cp ../minecraft-server-modded/mods.json ./mods.json
 	docker build \
-		--tag website:latest \
+		--tag $(CONTAINER) \
 		--build-arg SERVER_IP=${SERVER_IP} \
 		--build-arg SERVER_PORT1=${SERVER_PORT1} \
 		--build-arg SERVER_PORT2=${SERVER_PORT2} \
 		.
 
 push:
-	docker tag website:latest "$(REGISTRY)/website:latest"
-	docker push "$(REGISTRY)/website:latest"
+	docker tag "$(CONTAINER)" "$(REGISTRY)/$(CONTAINER)"
+	docker push "$(REGISTRY)/$(CONTAINER)"
 
 pull:
-	docker pull "$(REGISTRY)/website:latest"
-	docker tag "$(REGISTRY)/website:latest" website:latest
+	docker pull "$(REGISTRY)/$(CONTAINER)"
+	docker tag "$(REGISTRY)/$(CONTAINER)" $(CONTAINER)
 
 run:
-	docker run --rm -p 127.0.0.1:80:3000 --name website website:latest
+	docker run --rm -p 127.0.0.1:80:3000 --name website $(CONTAINER)
 
-install: pull
+install:
 	sudo cp services/website.service /etc/systemd/system/website.service
 	sudo systemctl daemon-reload
 	sudo systemctl enable website.service
@@ -36,3 +37,5 @@ uninstall:
 	sudo systemctl disable website.service      || true
 	sudo rm /etc/systemd/system/website.service || true
 	sudo systemctl daemon-reload                || true
+	docker rmi "$(CONTAINER)"                   || true
+	docker rmi "$(REGISTRY)/$(CONTAINER)"       || true

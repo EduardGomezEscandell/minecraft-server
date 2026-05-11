@@ -1,4 +1,4 @@
-REGISTRY ?= "minecraftcoleguisacr.azurecr.io"
+REGISTRY ?= minecraftcoleguisacr.azurecr.io
 SERVICE ?= minecraft
 CONTAINER ?= minecraft:latest
 SERVER_PORT ?= 25565
@@ -18,7 +18,7 @@ pull:
 
 run:
 	mkdir -p data/world data/logs
-	cd data && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json
+	cd data && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json || true
 	docker run                        \
 		--rm -p 127.0.0.1:16002:25565 \
 		--name minecraft              \
@@ -32,9 +32,10 @@ run:
 		--mount "type=bind,src=$(PWD)/data/whitelist.json,dst=/server/whitelist.json"           \
 		$(CONTAINER)
 
-install: pull
+install:
 # Create data directory
-	sudo mkdir -p '/data/$(SERVICE)'
+	sudo mkdir -m 1777 -p '/data'
+	mkdir -p '/data/$(SERVICE)'
 	cd '/data/$(SERVICE)' && mkdir -p world logs
 	cd '/data/$(SERVICE)' && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json
 	sudo chown -R 5000:5000 '/data/$(SERVICE)'
@@ -54,6 +55,8 @@ uninstall:
 	sudo systemctl disable '$(SERVICE).service'      || true
 	sudo rm '/etc/systemd/system/$(SERVICE).service' || true
 	sudo rm '/etc/systemd/system/$(SERVICE).socket'  || true
+	docker rmi "$(CONTAINER)"                        || true
+	docker rmi "$(REGISTRY)/$(CONTAINER)"            || true
 
 CMD ?= "/help"
 command: ## Connect to the server's console
