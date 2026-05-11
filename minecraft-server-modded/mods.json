@@ -15,6 +15,11 @@
     "url": "https://www.curseforge.com/minecraft/mc-mods/corpse"
   },
   {
+    "name": "Cupboard",
+    "project_id": "326652",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/cupboard"
+  },
+  {
     "name": "Dungeon Crawl",
     "project_id": "324973",
     "url": "https://www.curseforge.com/minecraft/mc-mods/dungeon-crawl"
@@ -58,10 +63,5 @@
     "name": "TrashSlot",
     "project_id": "235577",
     "url": "https://www.curseforge.com/minecraft/mc-mods/trashslot"
-  },
-  {
-    "name": "Cupboard",
-    "project_id": "326652",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/cupboard"
   }
 ]
