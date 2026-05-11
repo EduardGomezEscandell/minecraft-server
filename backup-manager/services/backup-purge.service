@@ -5,15 +5,20 @@ Wants=backup-purge.timer
 [Service]
 Type=oneshot
 ExecStart=/opt/backup-manager/backup-purge
-User=backup-manager
+User=root
 EnvironmentFile=/opt/backup-manager/env.conf
 
 StandardOutput=journal
 StandardError=journal
 
+UMask=0077
+WorkingDirectory=/
+
 # Some daemon restrictions
 LockPersonality=yes
 NoNewPrivileges=true
+PrivateDevices=yes
+PrivateIPC=yes
 PrivateMounts=yes
 PrivateTmp=yes
 ProtectControlGroups=yes
@@ -21,6 +26,10 @@ ProtectHostname=yes
 ProtectKernelLogs=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
+ProtectSystem=strict
+ReadOnlyPaths=/opt /data
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes
 SystemCallArchitectures=native

@@ -9,6 +9,7 @@ if ! az account show &> /dev/null; then
     echo "Logged in to Azure CLI with identity: ${SERVICE_ACCOUNT_NAME}"
 fi
 
+i=0
 az storage blob list \
     --account-name "${STORAGE_ACCOUNT_NAME}" \
     --container-name "${STORAGE_CONTAINER_NAME}" \
@@ -28,4 +29,7 @@ az storage blob list \
             --name "${blob_name}" \
             --auth-mode login \
             --output none
+        i=$((i + 1))
     done
+
+echo "Deleted $i old backup(s) from Azure Blob Storage: ${STORAGE_ACCOUNT_NAME}/${STORAGE_CONTAINER_NAME}"
