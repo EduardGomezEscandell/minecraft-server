@@ -12,16 +12,17 @@ SKIP_WEBSITE="${SKIP_WEBSITE:-}"
 SKIP_BACKUP_MANAGER="${SKIP_BACKUP_MANAGER:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TERRAFORM_DATA=$(cd "${SCRIPT_DIR}/infra" && terraform output -json)
 
-REMOTE_IP=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw vm_public_ip)
-REMOTE_USER=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw vm_username)
+REMOTE_IP=$(jq -r '.vm_public_ip.value' <<< "${TERRAFORM_DATA}")
+REMOTE_USER=$(jq -r '.vm_username.value' <<< "${TERRAFORM_DATA}")
 
-VM_OPEN_PORT_1=$(cd "${SCRIPT_DIR}/infra" && terraform output -json vm_open_minecraft_ports | jq -r '.[0][0]')
-VM_OPEN_PORT_2=$(cd "${SCRIPT_DIR}/infra" && terraform output -json vm_open_minecraft_ports | jq -r '.[0][1]')
+VM_OPEN_PORT_1=$(jq -r '.vm_open_minecraft_ports.value[0][0]' <<< "${TERRAFORM_DATA}")
+VM_OPEN_PORT_2=$(jq -r '.vm_open_minecraft_ports.value[0][1]' <<< "${TERRAFORM_DATA}")
 
-STORAGE_ACCOUNT_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw storage_account_name)
-STORAGE_CONTAINER_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw storage_container_name)
-STORAGE_ACR_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw acr_name)
+STORAGE_ACCOUNT_NAME=$(jq -r '.storage_account_name.value' <<< "${TERRAFORM_DATA}")
+STORAGE_CONTAINER_NAME=$(jq -r '.storage_container_name.value' <<< "${TERRAFORM_DATA}")
+STORAGE_ACR_NAME=$(jq -r '.acr_name.value' <<< "${TERRAFORM_DATA}")
 
 echo "REMOTE_IP                  = ${REMOTE_IP}"
 echo "REMOTE_USER                = ${REMOTE_USER}"
