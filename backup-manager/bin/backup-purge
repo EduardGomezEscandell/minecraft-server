@@ -2,11 +2,9 @@
 
 STORAGE_ACCOUNT_NAME="$1"
 STORAGE_CONTAINER_NAME="$2"
-SERVICE_ACCOUNT_NAME="${3:-}"
 
 echo "STORAGE_ACCOUNT_NAME   = ${STORAGE_ACCOUNT_NAME}"
 echo "STORAGE_CONTAINER_NAME = ${STORAGE_CONTAINER_NAME}"
-echo "SERVICE_ACCOUNT_NAME   = ${SERVICE_ACCOUNT_NAME}"
 
 if ! az account show &> /dev/null; then
     az login --identity --allow-no-subscriptions

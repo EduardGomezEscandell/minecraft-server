@@ -3,15 +3,12 @@ set -eu
 
 STORAGE_ACCOUNT_NAME="$1"
 STORAGE_CONTAINER_NAME="$2"
-SERVICE_ACCOUNT_NAME="${3:-}"
 
 echo "STORAGE_ACCOUNT_NAME   = ${STORAGE_ACCOUNT_NAME}"
 echo "STORAGE_CONTAINER_NAME = ${STORAGE_CONTAINER_NAME}"
-echo "SERVICE_ACCOUNT_NAME   = ${SERVICE_ACCOUNT_NAME}"
 
 if ! az account show &> /dev/null; then
     az login --identity --allow-no-subscriptions
-    echo "Logged in to Azure CLI with identity: ${SERVICE_ACCOUNT_NAME}"
 fi
 
 tmpdir=$(mktemp -d)
@@ -22,8 +19,8 @@ mkdir -p "${tmpdir}/${timestamp}/server-modded"
 echo "Created temporary directory: ${tmpdir}/${timestamp}"
 
 for file in banned-ips.json banned-players.json logs/latest.log ops.json whitelist.json world/; do
-    cp -r "/data/minecraft/$file"        "${tmpdir}/${timestamp}/server/"        && echo "Copied /data/minecraft/${file}"         || true
-    cp -r "/data/minecraft-modded/$file" "${tmpdir}/${timestamp}/server-modded/" && echo "Copied /data/minecraft-server/${file}"  || true
+    cp -r "/data/minecraft/${file}"        "${tmpdir}/${timestamp}/minecraft/"        && echo "Copied /data/minecraft/${file}"         || true
+    cp -r "/data/minecraft-modded/${file}" "${tmpdir}/${timestamp}/minecraft-modded/" && echo "Copied /data/minecraft-modded/${file}"  || true
 done
 
 cd "${tmpdir}"

@@ -1,7 +1,7 @@
 
 RELEASE:=$(shell bash -c 'source /etc/os-release && echo "$$VERSION_ID"')
 dependencies:
-	curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+	which az || curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 	DEBIAN_FRONTEND=noninteractive sudo apt install -y jq
 
 WHO := $(shell whoami)
