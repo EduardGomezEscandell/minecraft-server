@@ -24,7 +24,7 @@ tmux has-session -t "${SESSIONNAME}" &> /dev/null || {
     # Create a split pane for the backup manager logs
     tmux new-window -t "${SESSIONNAME}" -n  backup-manager -d
     tmux split-window -v -t "${SESSIONNAME}:backup-manager"
-    tmux send-keys -t "${SESSIONNAME}:backup-manager.0" "journalctl -u backup-manager.service -f" Enter
+    tmux send-keys -t "${SESSIONNAME}:backup-manager.0" "journalctl -u backup-create.service -f" Enter
     tmux select-pane -t "${SESSIONNAME}:backup-manager.1"
 }
 

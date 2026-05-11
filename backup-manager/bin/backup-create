@@ -13,8 +13,8 @@ fi
 
 tmpdir=$(mktemp -d)
 timestamp=$(date +'%Y%m%d_%H')
-mkdir -p "${tmpdir}/${timestamp}/server"
-mkdir -p "${tmpdir}/${timestamp}/server-modded"
+mkdir -p "${tmpdir}/${timestamp}/minecraft"
+mkdir -p "${tmpdir}/${timestamp}/minecraft-modded"
 
 echo "Created temporary directory: ${tmpdir}/${timestamp}"
 
