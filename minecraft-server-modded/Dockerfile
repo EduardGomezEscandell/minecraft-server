@@ -47,7 +47,7 @@ ADD server.properties /server/server.properties
 RUN echo "eula=true" > eula.txt
 RUN echo "-Xmx12G -Xms12G" > user_jvm_args.txt
 
-RUN adduser minecraft --no-create-home --disabled-password --gecos ""
+RUN adduser minecraft --no-create-home --disabled-password --gecos "" --uid 5001
 RUN chown -R minecraft:minecraft /server
 USER minecraft
 

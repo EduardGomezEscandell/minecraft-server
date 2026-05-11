@@ -18,7 +18,7 @@ FROM "${REGISTRY}/python:3.10-slim"
 
 COPY --from=0 /build/src /app
 
-RUN adduser webserver --no-create-home --disabled-password --gecos ""
+RUN adduser webserver --no-create-home --disabled-password --gecos "" --uid 5002
 RUN chown -R webserver:webserver /app
 
 USER webserver

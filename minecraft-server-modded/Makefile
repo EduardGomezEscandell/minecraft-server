@@ -1,3 +1,4 @@
+REGISTRY?="minecraftcoleguisacr.azurecr.io"
 SERVICE ?= minecraft-modded
 CONTAINER ?= minecraft-modded:latest
 SERVER_PORT ?= 25565
@@ -17,12 +18,12 @@ build:
 		.
 
 push:
-	docker tag $(CONTAINER) minecraftcoleguisacr.azurecr.io/$(CONTAINER)
-	docker push minecraftcoleguisacr.azurecr.io/$(CONTAINER)
+	docker tag $(CONTAINER) "$(REGISTRY)/$(CONTAINER)"
+	docker push "$(REGISTRY)/$(CONTAINER)"
 
 pull:
-	docker pull minecraftcoleguisacr.azurecr.io/$(CONTAINER)
-	docker tag minecraftcoleguisacr.azurecr.io/$(CONTAINER) $(CONTAINER)
+	docker pull "$(REGISTRY)/$(CONTAINER)"
+	docker tag "$(REGISTRY)/$(CONTAINER)" "$(CONTAINER)"
 
 run:
 	mkdir -p data/world data/logs
@@ -43,13 +44,9 @@ run:
 install: pull
 # Create data directory
 	sudo mkdir -p '/data/$(SERVICE)'
-	sudo chmod 1777 '/data/$(SERVICE)'
-
 	cd '/data/$(SERVICE)' && mkdir -p world logs
 	cd '/data/$(SERVICE)' && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json
-	sudo chown -R root:root '/data/$(SERVICE)'
-	find '/data/$(SERVICE)' -type d -exec sudo chmod 1777 {} \;
-	find '/data/$(SERVICE)' -type f -exec sudo chmod 0666 {} \;
+	sudo chown -R 5001:5001 '/data/$(SERVICE)'
 
 # Install service files
 	sudo cp 'services/$(SERVICE).socket' '/etc/systemd/system/$(SERVICE).socket'

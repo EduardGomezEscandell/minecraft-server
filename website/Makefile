@@ -1,5 +1,6 @@
 .PHONY: build push pull run install uninstall
 
+REGISTRY?="minecraftcoleguisacr.azurecr.io"
 SERVER_IP?="localhost"
 SERVER_PORT1?="16001"
 SERVER_PORT2?="16002"
@@ -14,12 +15,12 @@ build:
 		.
 
 push:
-	docker tag website:latest minecraftcoleguisacr.azurecr.io/website:latest
-	docker push minecraftcoleguisacr.azurecr.io/website:latest
+	docker tag website:latest "$(REGISTRY)/website:latest"
+	docker push "$(REGISTRY)/website:latest"
 
 pull:
-	docker pull minecraftcoleguisacr.azurecr.io/website:latest
-	docker tag minecraftcoleguisacr.azurecr.io/website:latest website:latest
+	docker pull "$(REGISTRY)/website:latest"
+	docker tag "$(REGISTRY)/website:latest" website:latest
 
 run:
 	docker run --rm -p 127.0.0.1:80:3000 --name website website:latest
