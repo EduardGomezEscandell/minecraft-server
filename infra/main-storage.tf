@@ -6,9 +6,10 @@ resource "azurerm_storage_account" "backups" {
   account_replication_type = "LRS"
 
   network_rules {
-    default_action             = "Allow"
+    default_action             = "Deny"
     bypass                     = ["AzureServices"]
     virtual_network_subnet_ids = [azurerm_subnet.compute.id]
+    ip_rules                   = [var.myIPAddress]
   }
 }
 

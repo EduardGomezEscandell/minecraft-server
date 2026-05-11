@@ -9,6 +9,6 @@ export TF_VAR_myIPAddress=$(curl -s ifconfig.me)
 
 # Validation
 ping -c 1 "${TF_VAR_myIPAddress}" &> /dev/null || {
-    echo "Unable to ping the IP address: $TF_VAR_myIPAddress. Please check your internet connection and try again."
+    echo "Unable to ping the IP address: $TF_VAR_myIPAddress. Are you sure this is your public IP address?"
     exit 1
 }
