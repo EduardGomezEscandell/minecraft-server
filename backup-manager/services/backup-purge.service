@@ -4,8 +4,9 @@ Wants=backup-purge.timer
 
 [Service]
 Type=oneshot
-ExecStart=/opt/backup-manager/backup-purge {{storage_account_name}} {{storage_container_name}}
+ExecStart=/opt/backup-manager/backup-purge
 User=backup-manager
+EnvironmentFile=/opt/backup-manager/env.conf
 
 StandardOutput=journal
 StandardError=journal

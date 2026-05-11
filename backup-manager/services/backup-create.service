@@ -4,8 +4,9 @@ Wants=backup-create.timer
 
 [Service]
 Type=oneshot
-ExecStart=/opt/backup-manager/backup-create {{storage_account_name}} {{storage_container_name}}
+ExecStart=/opt/backup-manager/backup-create
 User=root
+EnvironmentFile=/opt/backup-manager/env.conf
 
 StandardOutput=journal
 StandardError=journal
@@ -24,6 +25,10 @@ RestrictRealtime=yes
 RestrictSUIDSGID=yes
 SystemCallArchitectures=native
 SystemCallFilter=@system-service
+PrivateTmp=yes
+ProtectSystem=full
+InaccessiblePaths=/boot
+ReadOnlyPaths=/home /opt /data
 
 [Install]
 WantedBy=multi-user.target

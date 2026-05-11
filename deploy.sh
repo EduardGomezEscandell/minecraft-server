@@ -19,7 +19,6 @@ REMOTE_USER=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw vm_username)
 VM_OPEN_PORT_1=$(cd "${SCRIPT_DIR}/infra" && terraform output -json vm_open_minecraft_ports | jq -r '.[0][0]')
 VM_OPEN_PORT_2=$(cd "${SCRIPT_DIR}/infra" && terraform output -json vm_open_minecraft_ports | jq -r '.[0][1]')
 
-MANAGED_IDENTITY_CLIENT_ID=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw vm_identity_principal_id)
 STORAGE_ACCOUNT_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw storage_account_name)
 STORAGE_CONTAINER_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw storage_container_name)
 STORAGE_ACR_NAME=$(cd "${SCRIPT_DIR}/infra" && terraform output -raw acr_name)
@@ -28,7 +27,6 @@ echo "REMOTE_IP                  = ${REMOTE_IP}"
 echo "REMOTE_USER                = ${REMOTE_USER}"
 echo "VM_OPEN_PORT_1             = ${VM_OPEN_PORT_1}"
 echo "VM_OPEN_PORT_2             = ${VM_OPEN_PORT_2}"
-echo "MANAGED_IDENTITY_CLIENT_ID = ${MANAGED_IDENTITY_CLIENT_ID}"
 echo "STORAGE_ACCOUNT_NAME       = ${STORAGE_ACCOUNT_NAME}"
 echo "STORAGE_CONTAINER_NAME     = ${STORAGE_CONTAINER_NAME}"
 echo "STORAGE_ACR_NAME           = ${STORAGE_ACR_NAME}"
@@ -171,19 +169,15 @@ function deploy_backup_manager() {
         return
     fi
 
-    # Copy files over
-    sshremote "rm -rf backup-manager" || true
-    scp -P "${LOCAL_PORT}" -r "${SCRIPT_DIR}/backup-manager/" "${REMOTE_USER}@localhost:/home/${REMOTE_USER}/backup-manager"
+    MAKE_ARGS="STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT_NAME} STORAGE_CONTAINER_NAME=${STORAGE_CONTAINER_NAME}"
 
-    # Replace placeholders
-    for file in backup-create.service backup-purge.service; do
-        sshremote "sed -i \"s/{{storage_account_name}}/${STORAGE_ACCOUNT_NAME}/g\"     'backup-manager/services/${file}'"
-        sshremote "sed -i \"s/{{storage_container_name}}/${STORAGE_CONTAINER_NAME}/g\" 'backup-manager/services/${file}'"
-        sshremote "sed -i \"s/{{identity_client_id}}/${MANAGED_IDENTITY_CLIENT_ID}/g\" 'backup-manager/services/${file}'"
-    done
+    # Copy files over
+    sshremote mkdir -p "/home/${REMOTE_USER}/backup-manager"
+    sshremote "rm -rf backup-manager/*" || true
+    scpremote "${SCRIPT_DIR}/backup-manager" "/home/${REMOTE_USER}/"
 
     # Install
-    sshremote "cd backup-manager && make dependencies && make install && make start"
+    sshremote "cd backup-manager && make dependencies ${MAKE_ARGS} && make install ${MAKE_ARGS} && make start ${MAKE_ARGS}"
 
     # Check status
     sshremote "systemctl status backup-create.timer"
