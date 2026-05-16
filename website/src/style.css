@@ -165,15 +165,22 @@ a:hover {
     color: #000000;
 }
 
-.installation-steps,
-.modlist {
+.installation-steps {
     text-align: left;
     display: inline-block;
+    vertical-align: top;
     margin: 15px auto;
     padding-left: 30px;
     line-height: 1.8;
 }
 
+.modlist {
+    text-align: left;
+    display: block;
+    margin: 0;
+    padding-left: 30px;
+    line-height: 1.8;
+}
 .installation-steps li,
 .modlist li {
     margin-bottom: 10px;

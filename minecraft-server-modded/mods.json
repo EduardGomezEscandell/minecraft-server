@@ -2,66 +2,99 @@
   {
     "name": "Balm (Forge Edition)",
     "project_id": "531761",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/balm-forge-edition"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/balm-forge-edition",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "Biomes O' Plenty",
     "project_id": "220318",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "Corpse",
     "project_id": "316582",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/corpse"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/corpse",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "Cupboard",
     "project_id": "326652",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/cupboard"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/cupboard",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "Dungeon Crawl",
     "project_id": "324973",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/dungeon-crawl"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/dungeon-crawl",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "FallingTree",
     "project_id": "349559",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/falling-tree"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/falling-tree",
+    "server": "required",
+    "client": "recommended"
   },
   {
     "name": "Framework",
     "project_id": "549225",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/framework"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/framework",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "Glitchcore",
     "project_id": "955399",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/glitchcore"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/glitchcore",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "JourneyMap",
     "project_id": "32274",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/journeymap"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/journeymap",
+    "server": "required",
+    "client": "required"
+  },
+  {
+    "name": "Lithium",
+    "project_id": "360438",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/lithium",
+    "server": "required",
+    "client": "recommended"
   },
   {
     "name": "MrCrayfish's Furniture Mod: Refurbished",
     "project_id": "897116",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/refurbished-furniture"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/refurbished-furniture",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "Server Performance - Smooth Chunk Save[Forge/Fabric]",
     "project_id": "582327",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/smooth-chunk-save"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/smooth-chunk-save",
+    "server": "required",
+    "client": "recommended"
   },
   {
     "name": "TerraBlender (NeoForge)",
     "project_id": "940057",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/terrablender-neoforge"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/terrablender-neoforge",
+    "server": "required",
+    "client": "required"
   },
   {
     "name": "TrashSlot",
     "project_id": "235577",
-    "url": "https://www.curseforge.com/minecraft/mc-mods/trashslot"
+    "url": "https://www.curseforge.com/minecraft/mc-mods/trashslot",
+    "server": "required",
+    "client": "required"
   }
 ]

@@ -2,6 +2,7 @@
 
 REGISTRY?=minecraftcoleguisacr.azurecr.io
 CONTAINER?=website:latest
+SERVICE?=website
 SERVER_IP?=localhost
 SERVER_PORT1?=16001
 SERVER_PORT2?=16002
@@ -27,6 +28,13 @@ run:
 	docker run --rm -p 127.0.0.1:80:3000 --name website $(CONTAINER)
 
 install:
+	sudo mkdir -p /data && sudo chmod 1777 /data
+	sudo mkdir -p /data/$(SERVICE) && sudo chmod 1777 '/data/$(SERVICE)'
+
+	[ -f /data/$(SERVICE)/mods.tar.gz ] || install -m 0666 /dev/null /data/$(SERVICE)/mods.tar.gz
+	sudo chown -R 5002:5002 /data/$(SERVICE)
+
+	sudo chmod a+r /data/$(SERVICE)/mods.tar.gz
 	sudo cp services/website.service /etc/systemd/system/website.service
 	sudo systemctl daemon-reload
 	sudo systemctl enable website.service

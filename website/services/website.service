@@ -3,7 +3,11 @@ Description=WebServer
 After=getty.service
 
 [Service]
-ExecStart=docker run --rm -p "0.0.0.0:80:3000" --name website website:latest
+ExecStart=docker run --rm               \
+            --publish "0.0.0.0:80:3000" \
+            --mount type=bind,source=/data/website/mods.tar.gz,target=/app/mods.tar.gz,readonly \
+            --name website              \
+            website:latest
 ExecStop=docker stop website
 ExecReload=docker restart website
 

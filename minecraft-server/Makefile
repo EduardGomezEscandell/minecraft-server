@@ -34,7 +34,7 @@ run:
 
 install:
 # Create data directory
-	sudo mkdir -m 1777 -p '/data'
+	sudo mkdir -p '/data' && sudo chmod 1777 '/data'
 	mkdir -p '/data/$(SERVICE)'
 	cd '/data/$(SERVICE)' && mkdir -p world logs
 	cd '/data/$(SERVICE)' && touch banned-ips.json banned-players.json ops.json usercache.json whitelist.json

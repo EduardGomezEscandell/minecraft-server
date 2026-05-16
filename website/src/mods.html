@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>Tu regalo de Minecraft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="style.css?v=8">
+    <link rel="stylesheet" type="text/css" href="style.css?v=11">
 </head>
 
 <body>
@@ -36,12 +36,19 @@
                     <li>Instala <a href="https://docs.neoforged.net/user/docs/client" target="_blank">NeoForge</a>, la
                         herramienta de compatibilidad
                         de mods</li>
-                    <li>Descarga estos mods e instálalos:
-                        <ul class="modlist">
-                            {{modlist}}
-                        </ul>
+                    <li>
+                        Descarga los mods aquí: <a href="/mods.tar.gz" target="_blank">mods.tar.gz</a>. Descomprime el archivo y copia los mods a tu carpeta de mods de Minecraft.
                     </li>
                 </ol>
+
+                Estos son los mods que necesarios para jugar en el servidor (incluídos en la descarga de arriba):
+                <ul class="modlist">
+                    {{modlist}}
+                </ul>
+                Estos son opcionales, solo importarán si quieres jugar en singleplayer (también incluidos):
+                <ul class="modlist">
+                    {{recommended_modlist}}
+                </ul>
 
                 <p>
                     ¿Echas de menos algún mod?

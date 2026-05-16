@@ -122,6 +122,7 @@ function deploy_minecraft_server_modded() {
     pushd "${SCRIPT_DIR}/minecraft-server-modded"
     make build ${MAKE_ARGS}
     make push ${MAKE_ARGS}
+    make local-install ${MAKE_ARGS}
     popd
 
     # Install
@@ -129,6 +130,10 @@ function deploy_minecraft_server_modded() {
     sshremote "rm -rf minecraft-server-modded/*" || true
     scpremote "${SCRIPT_DIR}/minecraft-server-modded/Makefile"  "/home/${REMOTE_USER}/minecraft-server-modded/"
     scpremote "${SCRIPT_DIR}/minecraft-server-modded/services/" "/home/${REMOTE_USER}/minecraft-server-modded/"
+
+    # Helpful data for the website
+    sshremote mkdir -m 1777 -p "/home/${REMOTE_USER}/website"
+    scpremote "${SCRIPT_DIR}/minecraft-server-modded/mods.tar.gz" "/home/${REMOTE_USER}/minecraft-server-modded/"
 
     # Install
     sshremote "cd minecraft-server-modded && make pull ${MAKE_ARGS} && make install ${MAKE_ARGS}"
@@ -159,6 +164,7 @@ function deploy_website() {
 
     # Install
     sshremote "cd website  && make pull ${MAKE_ARGS} && make install ${MAKE_ARGS}"
+    sshremote install -m 0644 "/home/${REMOTE_USER}/minecraft-server-modded/mods.tar.gz" "/data/website/"
 
     # Check status
     sshremote systemctl status website.service
